@@ -122,7 +122,7 @@ const Config = (() => {
             { word: 'Gracias',         translation: 'Thank you',    sessionStatus: 'TO_REVIEW', dueDate: null, interval: 1, easeFactor: 2.5 },
             { word: 'Por favor',       translation: 'Please',       sessionStatus: 'TO_REVIEW', dueDate: null, interval: 1, easeFactor: 2.5 },
             { word: 'Sí',              translation: 'Yes',          sessionStatus: 'TO_REVIEW', dueDate: null, interval: 1, easeFactor: 2.5 },
-            { word: 'No',              translation: 'No',           sessionStatus: 'TO_REVIEW', dueDate: null, interval: 1, easeFactor: 2.5 },
+            { word: 'Lo siento',       translation: 'I am sorry',   sessionStatus: 'TO_REVIEW', dueDate: null, interval: 1, easeFactor: 2.5 },
             { word: 'Gato',            translation: 'Cat',          sessionStatus: 'TO_REVIEW', dueDate: null, interval: 1, easeFactor: 2.5 },
             { word: 'Perro',           translation: 'Dog',          sessionStatus: 'TO_REVIEW', dueDate: null, interval: 1, easeFactor: 2.5 },
             { word: 'Agua',            translation: 'Water',        sessionStatus: 'TO_REVIEW', dueDate: null, interval: 1, easeFactor: 2.5 },
