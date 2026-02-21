@@ -15,7 +15,7 @@ Open `index.html` in a modern browser. No build tools or dependencies required.
 - **Two Learning Modes** — Simple mode (Remembered / Forgot) and Spaced Repetition (SM-2 algorithm).
 - **Deck Management** — Create, open, and delete multiple decks stored in your browser.
 - **Card Editor** — Add, edit, delete, and search cards within any deck.
-- **Import from Text** — Paste cards in "Word - Translation" format, one per line.
+- **Import from .txt** — Create a deck directly from a `.txt` file (one card per line: `Word - Translation`).
 - **Import/Export Decks** — Save decks as JSON files and reload them at any time.
 - **Daily Limit** — Configure how many cards to study per day. Extend when you want more.
 - **Undo Last Rating** — Rewind the last card rating if you made a mistake.
@@ -62,6 +62,33 @@ Cards are scheduled based on your performance. Rate each card as:
 - **Easy** (7d+) — easy, long interval.
 
 The interval between reviews grows each time you rate a card as Good or Easy, following the SM-2 algorithm. Cards only appear when they are due.
+
+## Importing Decks from a Text File
+
+You can create a deck from a plain `.txt` file without any manual card entry. The file must have one card per line in this format:
+
+```
+word 1 - word 2
+word 3 - word 4
+```
+
+For example:
+
+```
+Cześć - Hello
+Dzień - Day
+Kot - Cat
+Herbata - Tea
+```
+
+**How to import:**
+1. Open **Manage Decks**
+2. Click **Import from .txt**
+3. Select your `.txt` file
+
+The deck is created automatically, named after the filename (minus the `.txt` extension). Lines that don't match the `Word - Translation` format are skipped and reported in the confirmation message.
+
+You can also add cards from a `.txt` file into an *existing* deck via **Edit Cards → Import from Text**, which loads the file into a preview textarea before importing.
 
 ## How It Works
 
