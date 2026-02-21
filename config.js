@@ -114,21 +114,21 @@ const Config = (() => {
     }
 
     function createExampleDeck() {
-        const deck = createEmptyDeck('French Basics (Example)');
+        const deck = createEmptyDeck('Spanish Basics (Example)');
         deck.dailyLimit = 5;
         deck.cards = [
-            { word: 'Bonjour',          translation: 'Hello',        sessionStatus: 'TO_REVIEW', dueDate: null, interval: 1, easeFactor: 2.5 },
-            { word: 'Au revoir',        translation: 'Goodbye',      sessionStatus: 'TO_REVIEW', dueDate: null, interval: 1, easeFactor: 2.5 },
-            { word: 'Merci',            translation: 'Thank you',    sessionStatus: 'TO_REVIEW', dueDate: null, interval: 1, easeFactor: 2.5 },
-            { word: "S'il vous plaît",  translation: 'Please',       sessionStatus: 'TO_REVIEW', dueDate: null, interval: 1, easeFactor: 2.5 },
-            { word: 'Oui',             translation: 'Yes',          sessionStatus: 'TO_REVIEW', dueDate: null, interval: 1, easeFactor: 2.5 },
-            { word: 'Non',             translation: 'No',           sessionStatus: 'TO_REVIEW', dueDate: null, interval: 1, easeFactor: 2.5 },
-            { word: 'Chat',            translation: 'Cat',          sessionStatus: 'TO_REVIEW', dueDate: null, interval: 1, easeFactor: 2.5 },
-            { word: 'Chien',           translation: 'Dog',          sessionStatus: 'TO_REVIEW', dueDate: null, interval: 1, easeFactor: 2.5 },
-            { word: 'Eau',             translation: 'Water',        sessionStatus: 'TO_REVIEW', dueDate: null, interval: 1, easeFactor: 2.5 },
-            { word: 'Pain',            translation: 'Bread',        sessionStatus: 'TO_REVIEW', dueDate: null, interval: 1, easeFactor: 2.5 },
-            { word: 'Maison',          translation: 'House',        sessionStatus: 'TO_REVIEW', dueDate: null, interval: 1, easeFactor: 2.5 },
-            { word: 'Livre',           translation: 'Book',         sessionStatus: 'TO_REVIEW', dueDate: null, interval: 1, easeFactor: 2.5 }
+            { word: 'Hola',            translation: 'Hello',        sessionStatus: 'TO_REVIEW', dueDate: null, interval: 1, easeFactor: 2.5 },
+            { word: 'Adiós',           translation: 'Goodbye',      sessionStatus: 'TO_REVIEW', dueDate: null, interval: 1, easeFactor: 2.5 },
+            { word: 'Gracias',         translation: 'Thank you',    sessionStatus: 'TO_REVIEW', dueDate: null, interval: 1, easeFactor: 2.5 },
+            { word: 'Por favor',       translation: 'Please',       sessionStatus: 'TO_REVIEW', dueDate: null, interval: 1, easeFactor: 2.5 },
+            { word: 'Sí',              translation: 'Yes',          sessionStatus: 'TO_REVIEW', dueDate: null, interval: 1, easeFactor: 2.5 },
+            { word: 'No',              translation: 'No',           sessionStatus: 'TO_REVIEW', dueDate: null, interval: 1, easeFactor: 2.5 },
+            { word: 'Gato',            translation: 'Cat',          sessionStatus: 'TO_REVIEW', dueDate: null, interval: 1, easeFactor: 2.5 },
+            { word: 'Perro',           translation: 'Dog',          sessionStatus: 'TO_REVIEW', dueDate: null, interval: 1, easeFactor: 2.5 },
+            { word: 'Agua',            translation: 'Water',        sessionStatus: 'TO_REVIEW', dueDate: null, interval: 1, easeFactor: 2.5 },
+            { word: 'Pan',             translation: 'Bread',        sessionStatus: 'TO_REVIEW', dueDate: null, interval: 1, easeFactor: 2.5 },
+            { word: 'Casa',            translation: 'House',        sessionStatus: 'TO_REVIEW', dueDate: null, interval: 1, easeFactor: 2.5 },
+            { word: 'Libro',           translation: 'Book',         sessionStatus: 'TO_REVIEW', dueDate: null, interval: 1, easeFactor: 2.5 }
         ];
         return deck;
     }
