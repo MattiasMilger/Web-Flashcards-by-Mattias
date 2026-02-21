@@ -12,6 +12,7 @@
 const UI = (() => {
     let currentDeck = null;
     let appState = 'NO_DECK';
+    let showTranslationFirst = false;
 
     // ========================
     // Deck loading
@@ -46,6 +47,7 @@ const UI = (() => {
             appState = 'SESSION_COMPLETE';
         } else {
             appState = 'SHOW_FRONT';
+            showTranslationFirst = Math.random() < 0.5;
         }
         render();
     }
@@ -98,8 +100,10 @@ const UI = (() => {
         const btnBackToFront   = document.getElementById('btn-back-to-front');
         const btnRewind        = document.getElementById('btn-rewind');
 
-        // Card text
-        cardText.textContent = showBack ? card.translation : card.word;
+        // Card text (randomly show word or translation as the question side)
+        const questionSide = showTranslationFirst ? card.translation : card.word;
+        const answerSide   = showTranslationFirst ? card.word : card.translation;
+        cardText.textContent = showBack ? answerSide : questionSide;
 
         // Progress indicator
         const progress = Session.getProgress();
