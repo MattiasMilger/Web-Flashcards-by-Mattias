@@ -32,6 +32,14 @@ const Config = (() => {
                 config = { currentDeckName: null, theme: 'dark', deckNames: [] };
             }
         }
+
+        // First launch: create and open the example deck
+        if (config.deckNames.length === 0) {
+            const example = createExampleDeck();
+            saveDeck(example);
+            config.currentDeckName = example.name;
+            save();
+        }
     }
 
     function save() {
@@ -103,6 +111,26 @@ const Config = (() => {
             cardsReviewedToday: 0,
             sessionExtension: 0
         };
+    }
+
+    function createExampleDeck() {
+        const deck = createEmptyDeck('French Basics (Example)');
+        deck.dailyLimit = 5;
+        deck.cards = [
+            { word: 'Bonjour',          translation: 'Hello',        sessionStatus: 'TO_REVIEW', dueDate: null, interval: 1, easeFactor: 2.5 },
+            { word: 'Au revoir',        translation: 'Goodbye',      sessionStatus: 'TO_REVIEW', dueDate: null, interval: 1, easeFactor: 2.5 },
+            { word: 'Merci',            translation: 'Thank you',    sessionStatus: 'TO_REVIEW', dueDate: null, interval: 1, easeFactor: 2.5 },
+            { word: "S'il vous plaît",  translation: 'Please',       sessionStatus: 'TO_REVIEW', dueDate: null, interval: 1, easeFactor: 2.5 },
+            { word: 'Oui',             translation: 'Yes',          sessionStatus: 'TO_REVIEW', dueDate: null, interval: 1, easeFactor: 2.5 },
+            { word: 'Non',             translation: 'No',           sessionStatus: 'TO_REVIEW', dueDate: null, interval: 1, easeFactor: 2.5 },
+            { word: 'Chat',            translation: 'Cat',          sessionStatus: 'TO_REVIEW', dueDate: null, interval: 1, easeFactor: 2.5 },
+            { word: 'Chien',           translation: 'Dog',          sessionStatus: 'TO_REVIEW', dueDate: null, interval: 1, easeFactor: 2.5 },
+            { word: 'Eau',             translation: 'Water',        sessionStatus: 'TO_REVIEW', dueDate: null, interval: 1, easeFactor: 2.5 },
+            { word: 'Pain',            translation: 'Bread',        sessionStatus: 'TO_REVIEW', dueDate: null, interval: 1, easeFactor: 2.5 },
+            { word: 'Maison',          translation: 'House',        sessionStatus: 'TO_REVIEW', dueDate: null, interval: 1, easeFactor: 2.5 },
+            { word: 'Livre',           translation: 'Book',         sessionStatus: 'TO_REVIEW', dueDate: null, interval: 1, easeFactor: 2.5 }
+        ];
+        return deck;
     }
 
     // ========================
