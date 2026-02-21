@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Flashcards by Mattias</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="dark-mode">
+    <div id="message-area" class="message-area hidden"></div>
+
+    <div class="container">
+        <h1>Web Flashcards</h1>
+        <h2 class="subtitle">by Mattias</h2>
+
+        <div class="header-controls">
+            <div class="header-buttons">
+                <button id="btn-manage-decks" class="control-button accent-button">Manage Decks</button>
+                <button id="btn-settings" class="control-button">Settings</button>
+            </div>
+            <div class="header-buttons">
+                <button id="btn-edit-cards" class="control-button hidden">Edit Cards</button>
+            </div>
+            <div class="header-buttons">
+                <button id="btn-toggle-theme" class="control-button">Toggle Theme</button>
+                <button id="btn-info" class="control-button">Info</button>
+            </div>
+        </div>
+
+        <!-- Deck status bar -->
+        <div id="deck-status-bar" class="deck-status-bar hidden">
+            <span id="deck-name-label" class="deck-name"></span>
+            <span id="deck-progress-label" class="deck-progress"></span>
+            <span id="deck-mode-label" class="deck-mode"></span>
+        </div>
+
+        <!-- NO_DECK state -->
+        <div id="no-deck-area" class="state-area">
+            <p class="placeholder-text">No deck loaded. Use <strong>Manage Decks</strong> to open or create a deck.</p>
+        </div>
+
+        <!-- Active session area (SHOW_FRONT, SHOW_BACK) -->
+        <div id="session-area" class="state-area hidden">
+            <div class="card-progress-bar">
+                <span id="card-progress" class="card-progress-text"></span>
+            </div>
+
+            <div id="card-display" class="card-display" title="Click to copy text">
+                <div id="card-text" class="card-text"></div>
+            </div>
+
+            <!-- Show Answer button (SHOW_FRONT) -->
+            <div id="show-answer-area" class="button-area">
+                <button id="btn-show-answer" class="main-button">Show Answer</button>
+            </div>
+
+            <!-- Simple mode rating buttons (SHOW_BACK) -->
+            <div id="rating-simple" class="rating-buttons hidden">
+                <button id="btn-forgot" class="rating-button fail-button">
+                    Forgot
+                    <span class="button-sub">To Review Again</span>
+                </button>
+                <button id="btn-remembered" class="rating-button success-button">
+                    Remembered
+                    <span class="button-sub">Finished</span>
+                </button>
+            </div>
+
+            <!-- Spaced mode rating buttons (SHOW_BACK) -->
+            <div id="rating-spaced" class="rating-buttons hidden">
+                <button id="btn-again" class="rating-button fail-button">
+                    Again
+                    <span class="button-sub">&lt;10m</span>
+                </button>
+                <button id="btn-hard" class="rating-button hard-button">
+                    Hard
+                    <span class="button-sub">1–2d</span>
+                </button>
+                <button id="btn-good" class="rating-button success-button">
+                    Good
+                    <span class="button-sub">3–7d</span>
+                </button>
+                <button id="btn-easy" class="rating-button easy-button">
+                    Easy
+                    <span class="button-sub">7d+</span>
+                </button>
+            </div>
+
+            <!-- Rewind / back-to-front -->
+            <div class="button-area rewind-row">
+                <button id="btn-back-to-front" class="control-button subtle-button hidden">← Back to Question</button>
+                <button id="btn-rewind" class="control-button hidden">↩ Undo Last Rating</button>
+            </div>
+        </div>
+
+        <!-- SESSION_COMPLETE state -->
+        <div id="complete-area" class="state-area hidden">
+            <div class="complete-message">
+                <h3 id="complete-title">Session Complete!</h3>
+                <p id="complete-subtitle"></p>
+                <div class="extend-session-row">
+                    <input type="number" id="extend-amount-main" value="5" min="1" max="100" class="extend-input">
+                    <button id="btn-extend-session-main" class="control-button accent-button">Study More Cards</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== Modals ===== -->
+
+    <!-- Manage Decks Modal -->
+    <div id="deck-manager-modal" class="modal hidden">
+        <div class="modal-content modal-large">
+            <span class="close-button" data-modal="deck-manager-modal">&times;</span>
+            <h2>Manage Decks</h2>
+            <div class="feed-list-container">
+                <select id="deck-listbox" size="8" class="feed-listbox"></select>
+            </div>
+            <div class="modal-button-row">
+                <button id="btn-deck-open" class="modal-action-button accent-button">Open Selected</button>
+                <button id="btn-deck-new" class="modal-action-button">New Deck</button>
+                <button id="btn-deck-delete" class="modal-action-button danger-button">Delete Selected</button>
+            </div>
+            <div class="modal-button-row">
+                <button id="btn-deck-export" class="modal-action-button">Export Deck (.json)</button>
+                <button id="btn-deck-import-trigger" class="modal-action-button">Import Deck (.json)</button>
+                <button id="btn-deck-import-txt-trigger" class="modal-action-button">Import from .txt</button>
+            </div>
+            <input type="file" id="deck-file-input" accept=".json" class="hidden-file-input">
+            <input type="file" id="deck-txt-file-input" accept=".txt" class="hidden-file-input">
+            <button class="modal-close-button" data-modal="deck-manager-modal">Close</button>
+        </div>
+    </div>
+
+    <!-- New Deck Modal -->
+    <div id="new-deck-modal" class="modal hidden">
+        <div class="modal-content modal-small">
+            <span class="close-button" data-modal="new-deck-modal">&times;</span>
+            <h2>New Deck</h2>
+            <div class="form-group">
+                <label for="new-deck-name">Deck Name:</label>
+                <input type="text" id="new-deck-name" placeholder="e.g., Polish Words" maxlength="80">
+            </div>
+            <div class="modal-button-row">
+                <button id="btn-new-deck-create" class="modal-action-button accent-button">Create</button>
+                <button class="modal-action-button" data-modal="new-deck-modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card Editor Modal -->
+    <div id="card-editor-modal" class="modal hidden">
+        <div class="modal-content modal-large">
+            <span class="close-button" data-modal="card-editor-modal">&times;</span>
+            <h2>Edit Cards — <span id="editor-deck-name"></span></h2>
+            <div class="editor-toolbar">
+                <input type="text" id="card-search" placeholder="Search cards..." class="search-input">
+                <button id="btn-add-card" class="modal-action-button accent-button">Add Card</button>
+                <button id="btn-import-cards-open" class="modal-action-button">Import from Text</button>
+            </div>
+            <div class="card-list-container">
+                <div id="card-list" class="card-list"></div>
+            </div>
+            <button class="modal-close-button" data-modal="card-editor-modal">Close</button>
+        </div>
+    </div>
+
+    <!-- Add/Edit Card Modal -->
+    <div id="card-edit-modal" class="modal hidden">
+        <div class="modal-content modal-small">
+            <span class="close-button" data-modal="card-edit-modal">&times;</span>
+            <h2 id="card-edit-title">Add Card</h2>
+            <div class="form-group">
+                <label for="card-word-input">Word / Front:</label>
+                <input type="text" id="card-word-input" placeholder="e.g., Cześć">
+            </div>
+            <div class="form-group">
+                <label for="card-translation-input">Translation / Back:</label>
+                <input type="text" id="card-translation-input" placeholder="e.g., Hello">
+            </div>
+            <div class="modal-button-row">
+                <button id="btn-card-save" class="modal-action-button accent-button">Save</button>
+                <button class="modal-action-button" data-modal="card-edit-modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Import Cards from Text Modal -->
+    <div id="import-cards-modal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-button" data-modal="import-cards-modal">&times;</span>
+            <h2>Import Cards from Text</h2>
+            <p class="modal-subtitle">One card per line. Format: <strong>Word - Translation</strong></p>
+            <div class="form-group">
+                <div class="import-file-row">
+                    <button id="btn-import-txt-file" class="modal-action-button">Choose .txt File</button>
+                    <span id="import-file-name" class="import-file-label">or paste text below</span>
+                </div>
+                <input type="file" id="import-txt-file-input" accept=".txt" class="hidden-file-input">
+                <textarea id="import-text-area" rows="10" placeholder="Cześć - Hello&#10;Dzień - Day&#10;Kot - Cat"></textarea>
+            </div>
+            <div class="modal-button-row">
+                <button id="btn-import-confirm" class="modal-action-button accent-button">Import</button>
+                <button class="modal-action-button" data-modal="import-cards-modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal hidden">
+        <div class="modal-content modal-small">
+            <span class="close-button" data-modal="settings-modal">&times;</span>
+            <h2>Settings</h2>
+            <div class="form-group">
+                <label>Learning Mode:</label>
+                <div class="radio-group">
+                    <label><input type="radio" name="learning-mode" value="simple"> Simple</label>
+                    <label><input type="radio" name="learning-mode" value="spaced"> Spaced Repetition</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="daily-limit-input">Daily Card Limit:</label>
+                <input type="number" id="daily-limit-input" min="1" max="500" value="5">
+            </div>
+            <div class="form-group" id="extend-session-group">
+                <label>Add Extra Cards Today:</label>
+                <div class="extend-inline">
+                    <input type="number" id="extend-amount" min="1" max="500" value="5" class="extend-input-small">
+                    <button id="btn-extend-confirm" class="modal-action-button accent-button">Extend Session</button>
+                </div>
+            </div>
+            <div class="modal-button-row">
+                <button id="btn-settings-save" class="modal-action-button accent-button">Save</button>
+                <button class="modal-action-button" data-modal="settings-modal">Cancel</button>
+            </div>
+            <div class="form-group" id="reset-cards-group">
+                <label class="reset-label">Reset Deck Progress</label>
+                <button id="btn-reset-cards" class="modal-action-button danger-button">Reset All Cards to "To Review"</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Info Modal -->
+    <div id="info-modal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-button" data-modal="info-modal">&times;</span>
+            <h2>Help &amp; Info</h2>
+            <div id="info-text">
+                <h3>About</h3>
+                <div class="info-section">
+                    <strong>Web Flashcards by Mattias</strong>
+                    <p>A browser-based flashcard study app. Create decks, add cards, and study using Simple or Spaced Repetition mode — all from your browser with no server required.</p>
+                </div>
+
+                <h3>Features</h3>
+                <div class="info-section">
+                    <strong>Deck Management</strong>
+                    <ul class="info-list">
+                        <li><strong>Create decks</strong> — give each deck a name and start adding cards.</li>
+                        <li><strong>Import/Export</strong> — save decks as JSON files and reload them later.</li>
+                        <li><strong>Import from text</strong> — paste cards in "Word - Translation" format, one per line.</li>
+                    </ul>
+                </div>
+                <div class="info-section">
+                    <strong>Simple Mode</strong>
+                    <ul class="info-list">
+                        <li>Review cards one by one. Rate each as <strong>Remembered</strong> or <strong>Forgot</strong>.</li>
+                        <li>Remembered cards move to Finished. Forgot cards stay in the queue.</li>
+                        <li>Session ends when the daily limit is reached or all cards are finished.</li>
+                    </ul>
+                </div>
+                <div class="info-section">
+                    <strong>Spaced Repetition Mode (SM-2)</strong>
+                    <ul class="info-list">
+                        <li>Cards are scheduled based on how well you know them.</li>
+                        <li><strong>Again</strong> (&lt;10m) — failed, review again soon.</li>
+                        <li><strong>Hard</strong> (1–2d) — struggled, short interval.</li>
+                        <li><strong>Good</strong> (3–7d) — normal, standard interval.</li>
+                        <li><strong>Easy</strong> (7d+) — easy, long interval.</li>
+                        <li>Only cards due today (or overdue) appear in your session.</li>
+                    </ul>
+                </div>
+                <div class="info-section">
+                    <strong>Session Controls</strong>
+                    <ul class="info-list">
+                        <li><strong>Daily Limit</strong> — set how many cards to study per day in Settings.</li>
+                        <li><strong>Study More</strong> — extend the session when daily limit is reached.</li>
+                        <li><strong>Undo Last Rating</strong> — undo your most recent card rating.</li>
+                        <li><strong>Click the card</strong> — copies the displayed text to clipboard.</li>
+                    </ul>
+                </div>
+                <div class="info-section">
+                    <strong>Appearance</strong>
+                    <ul class="info-list">
+                        <li><strong>Dark / Light mode</strong> — toggle theme with the button.</li>
+                        <li><strong>Responsive</strong> — works on desktop and mobile.</li>
+                    </ul>
+                </div>
+
+                <h3>Keyboard Shortcuts</h3>
+                <div class="info-section">
+                    <ul class="info-list">
+                        <li><strong>Space / Enter</strong> — show answer (when viewing card front).</li>
+                        <li><strong>1</strong> — Forgot / Again</li>
+                        <li><strong>2</strong> — Remembered / Hard</li>
+                        <li><strong>3</strong> — Good (spaced mode)</li>
+                        <li><strong>4</strong> — Easy (spaced mode)</li>
+                        <li><strong>Escape</strong> — close any open modal.</li>
+                    </ul>
+                </div>
+
+                <h3>Technical Notes</h3>
+                <div class="info-section">
+                    <p>All data is stored in your browser's <code>localStorage</code>. Nothing is sent to a server. Clearing browser data will erase your decks — export them first as a backup.</p>
+                </div>
+            </div>
+            <button class="modal-close-button" data-modal="info-modal">Close</button>
+        </div>
+    </div>
+
+    <footer>
+        <p><a href="https://github.com/MattiasMilger/Web-Flashcards-by-Mattias" target="_blank" rel="noopener noreferrer">GitHub Repository</a></p>
+    </footer>
+
+    <script src="config.js"></script>
+    <script src="session.js"></script>
+    <script src="dialogs.js"></script>
+    <script src="ui.js"></script>
+</body>
+</html>
