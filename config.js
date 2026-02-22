@@ -8,7 +8,7 @@ const Config = (() => {
     const DECK_PREFIX = 'flashcards_deck_';
 
     const DEFAULT_DAILY_LIMIT = 5;
-    const DEFAULT_LEARNING_MODE = 'simple';
+    const DEFAULT_LEARNING_MODE = 'spaced';
 
     let config = {
         currentDeckName: null,

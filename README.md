@@ -49,12 +49,7 @@ Web Flashcards by Mattias/
 
 ## Learning Modes
 
-### Simple Mode
-Cards are marked as **To Review** or **Finished**. Each session reviews cards up to the daily limit. Rate each card as:
-- **Remembered** — card moves to Finished.
-- **Forgot** — card stays in the queue.
-
-### Spaced Repetition (SM-2)
+### Spaced Repetition (SM-2) — Default
 Cards are scheduled based on your performance. Rate each card as:
 - **Again** (<10m) — failed, shown again soon.
 - **Hard** (1–2d) — struggled, short interval.
@@ -62,6 +57,11 @@ Cards are scheduled based on your performance. Rate each card as:
 - **Easy** (7d+) — easy, long interval.
 
 The interval between reviews grows each time you rate a card as Good or Easy, following the SM-2 algorithm. Cards only appear when they are due.
+
+### Simple Mode
+Cards are marked as **To Review** or **Finished**. Each session reviews cards up to the daily limit. Rate each card as:
+- **Remembered** — card moves to Finished.
+- **Forgot** — card stays in the queue.
 
 ## Importing Decks from a Text File
 
