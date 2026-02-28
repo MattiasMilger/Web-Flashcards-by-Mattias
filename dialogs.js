@@ -55,6 +55,7 @@ const Dialogs = (() => {
         document.getElementById('btn-deck-new').addEventListener('click', openNewDeckModal);
         document.getElementById('btn-deck-delete').addEventListener('click', deleteSelectedDeck);
         document.getElementById('btn-deck-export').addEventListener('click', exportSelectedDeck);
+        document.getElementById('btn-deck-export-txt').addEventListener('click', exportSelectedDeckTxt);
         document.getElementById('btn-deck-import-trigger').addEventListener('click', triggerDeckImport);
         document.getElementById('deck-file-input').addEventListener('change', handleDeckImportFile);
         document.getElementById('btn-deck-import-txt-trigger').addEventListener('click', () => {
@@ -211,6 +212,18 @@ const Dialogs = (() => {
 
         Config.exportDeck(deck);
         UI.showMessage(`Deck "${selected}" exported.`, 'success', 3000);
+    }
+
+    function exportSelectedDeckTxt() {
+        const listbox  = document.getElementById('deck-listbox');
+        const selected = listbox.value;
+        if (!selected) { UI.showMessage('Please select a deck to export.', 'warning'); return; }
+
+        const deck = Config.loadDeck(selected);
+        if (!deck) return;
+
+        Config.exportDeckTxt(deck);
+        UI.showMessage(`Deck "${selected}" exported as .txt.`, 'success', 3000);
     }
 
     function triggerDeckImport() {
@@ -534,15 +547,12 @@ const Dialogs = (() => {
         });
         document.getElementById('daily-limit-input').value = limit;
 
-        // Show extend/reset only when a deck is active
+        // Show extend only when a deck is active
         const extendGroup = document.getElementById('extend-session-group');
-        const resetGroup  = document.getElementById('reset-cards-group');
         if (deck) {
             extendGroup.classList.remove('hidden');
-            resetGroup.classList.remove('hidden');
         } else {
             extendGroup.classList.add('hidden');
-            resetGroup.classList.add('hidden');
         }
 
         openModal('settings-modal');
@@ -599,7 +609,7 @@ const Dialogs = (() => {
 
         Config.saveDeck(deck);
         Session.buildQueue(deck);
-        closeModal('settings-modal');
+        renderCardList(deck.cards, '');
         UI.updateState();
         UI.showMessage(`All cards in "${deck.name}" reset to "To Review".`, 'success');
     }

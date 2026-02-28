@@ -16,7 +16,7 @@ Open `index.html` in a modern browser. No build tools or dependencies required.
 - **Deck Management** — Create, open, and delete multiple decks stored in your browser.
 - **Card Editor** — Add, edit, delete, and search cards within any deck.
 - **Import from .txt** — Create a deck from a `.txt` file. Accepts `Word - Translation` format and tab-separated (Anki export) format.
-- **Import/Export Decks** — Save decks as JSON files and reload them at any time.
+- **Import/Export Decks** — Save decks as `.json` or `.txt` files and reload them at any time.
 - **Daily Limit** — Configure how many cards to study per day. Extend when you want more.
 - **Undo Last Rating** — Rewind the last card rating if you made a mistake.
 - **Keyboard Shortcuts** — Space/Enter to show answer; 1–4 to rate cards.

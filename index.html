@@ -122,6 +122,7 @@
             </div>
             <div class="modal-button-row">
                 <button id="btn-deck-export" class="modal-action-button">Export Deck (.json)</button>
+                <button id="btn-deck-export-txt" class="modal-action-button">Export Deck (.txt)</button>
                 <button id="btn-deck-import-trigger" class="modal-action-button">Import Deck (.json)</button>
                 <button id="btn-deck-import-txt-trigger" class="modal-action-button">Import from .txt</button>
             </div>
@@ -159,6 +160,9 @@
             </div>
             <div class="card-list-container">
                 <div id="card-list" class="card-list"></div>
+            </div>
+            <div class="modal-button-row">
+                <button id="btn-reset-cards" class="modal-action-button danger-button">Reset All Cards to "To Review"</button>
             </div>
             <button class="modal-close-button" data-modal="card-editor-modal">Close</button>
         </div>
@@ -232,10 +236,6 @@
                 <button id="btn-settings-save" class="modal-action-button accent-button">Save</button>
                 <button class="modal-action-button" data-modal="settings-modal">Cancel</button>
             </div>
-            <div class="form-group" id="reset-cards-group">
-                <label class="reset-label">Reset Deck Progress</label>
-                <button id="btn-reset-cards" class="modal-action-button danger-button">Reset All Cards to "To Review"</button>
-            </div>
         </div>
     </div>
 
@@ -256,7 +256,7 @@
                     <strong>Deck Management</strong>
                     <ul class="info-list">
                         <li><strong>Create decks</strong> — give each deck a name and start adding cards.</li>
-                        <li><strong>Import/Export</strong> — save decks as JSON files and reload them later.</li>
+                        <li><strong>Import/Export</strong> — save decks as <code>.json</code> or <code>.txt</code> files and reload them later.</li>
                         <li><strong>Import from text</strong> — paste or load cards in "Word - Translation" or tab-separated (Anki export) format, one per line.</li>
                     </ul>
                 </div>

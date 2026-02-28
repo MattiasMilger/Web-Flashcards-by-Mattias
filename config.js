@@ -137,6 +137,19 @@ const Config = (() => {
     // Export / Import
     // ========================
 
+    function exportDeckTxt(deck) {
+        const lines = deck.cards.map(c => `${c.word} - ${c.translation}`).join('\n');
+        const blob  = new Blob([lines], { type: 'text/plain' });
+        const url   = URL.createObjectURL(blob);
+        const a     = document.createElement('a');
+        a.href      = url;
+        a.download  = deck.name.replace(/[^a-z0-9_\-]/gi, '_') + '.txt';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
     function exportDeck(deck) {
         const data = JSON.stringify(deck, null, 2);
         const blob = new Blob([data], { type: 'application/json' });
@@ -190,6 +203,7 @@ const Config = (() => {
         saveDeck,
         deleteDeck,
         createEmptyDeck,
+        exportDeckTxt,
         exportDeck,
         importDeck
     };
