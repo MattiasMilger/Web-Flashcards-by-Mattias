@@ -265,22 +265,19 @@ const Dialogs = (() => {
             const skipped = [];
 
             lines.forEach(line => {
-                const dashIdx = line.indexOf(' - ');
-                if (dashIdx > 0) {
-                    const word        = line.substring(0, dashIdx).trim();
-                    const translation = line.substring(dashIdx + 3).trim();
-                    if (word && translation) {
-                        cards.push({
-                            word, translation,
-                            sessionStatus: 'TO_REVIEW',
-                            dueDate: null, interval: 1, easeFactor: 2.5
-                        });
-                    } else { skipped.push(line); }
+                if (line.startsWith('#')) return; // Anki export comment/header lines
+                const parsed = parseTxtLine(line);
+                if (parsed) {
+                    cards.push({
+                        word: parsed.word, translation: parsed.translation,
+                        sessionStatus: 'TO_REVIEW',
+                        dueDate: null, interval: 1, easeFactor: 2.5
+                    });
                 } else { skipped.push(line); }
             });
 
             if (cards.length === 0) {
-                UI.showMessage('No valid cards found. Format must be "Word - Translation".', 'error');
+                UI.showMessage('No valid cards found. Use "Word - Translation" or tab-separated (Anki) format.', 'error');
                 return;
             }
 
@@ -497,23 +494,18 @@ const Dialogs = (() => {
         let   skipped = 0;
 
         lines.forEach(line => {
-            const dashIdx = line.indexOf(' - ');
-            if (dashIdx > 0) {
-                const word        = line.substring(0, dashIdx).trim();
-                const translation = line.substring(dashIdx + 3).trim();
-                if (word && translation) {
-                    deck.cards.push({
-                        word,
-                        translation,
-                        sessionStatus: 'TO_REVIEW',
-                        dueDate:       null,
-                        interval:      1,
-                        easeFactor:    2.5
-                    });
-                    added++;
-                } else {
-                    skipped++;
-                }
+            if (line.startsWith('#')) return; // Anki export comment/header lines
+            const parsed = parseTxtLine(line);
+            if (parsed) {
+                deck.cards.push({
+                    word:          parsed.word,
+                    translation:   parsed.translation,
+                    sessionStatus: 'TO_REVIEW',
+                    dueDate:       null,
+                    interval:      1,
+                    easeFactor:    2.5
+                });
+                added++;
             } else {
                 skipped++;
             }
@@ -524,7 +516,7 @@ const Dialogs = (() => {
         renderCardList(deck.cards, document.getElementById('card-search').value.trim());
 
         let msg = `${added} card(s) imported.`;
-        if (skipped > 0) msg += ` ${skipped} line(s) skipped (format must be "Word - Translation").`;
+        if (skipped > 0) msg += ` ${skipped} line(s) skipped (use "Word - Translation" or tab-separated format).`;
         UI.showMessage(msg, added > 0 ? 'success' : 'warning');
     }
 
@@ -615,6 +607,30 @@ const Dialogs = (() => {
     // ========================
     // Utility
     // ========================
+
+    /**
+     * Parse a single line from a text import.
+     * Accepts tab-separated (Anki plain-text export: Front\tBack[\tTags...])
+     * and dash-separated (Word - Translation) formats.
+     * Returns { word, translation } or null if the line cannot be parsed.
+     */
+    function parseTxtLine(line) {
+        // Tab-separated: first two fields are front and back; any further fields (e.g. tags) are ignored
+        const tabIdx = line.indexOf('\t');
+        if (tabIdx > 0) {
+            const word        = line.substring(0, tabIdx).trim();
+            const translation = line.substring(tabIdx + 1).split('\t')[0].trim();
+            if (word && translation) return { word, translation };
+        }
+        // Dash-separated
+        const dashIdx = line.indexOf(' - ');
+        if (dashIdx > 0) {
+            const word        = line.substring(0, dashIdx).trim();
+            const translation = line.substring(dashIdx + 3).trim();
+            if (word && translation) return { word, translation };
+        }
+        return null;
+    }
 
     function escHtml(str) {
         const div = document.createElement('div');

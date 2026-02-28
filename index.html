@@ -189,14 +189,14 @@
         <div class="modal-content">
             <span class="close-button" data-modal="import-cards-modal">&times;</span>
             <h2>Import Cards from Text</h2>
-            <p class="modal-subtitle">One card per line. Format: <strong>Word - Translation</strong></p>
+            <p class="modal-subtitle">One card per line: <strong>Word - Translation</strong> or tab-separated (Anki export).</p>
             <div class="form-group">
                 <div class="import-file-row">
                     <button id="btn-import-txt-file" class="modal-action-button">Choose .txt File</button>
                     <span id="import-file-name" class="import-file-label">or paste text below</span>
                 </div>
                 <input type="file" id="import-txt-file-input" accept=".txt" class="hidden-file-input">
-                <textarea id="import-text-area" rows="10" placeholder="Cześć - Hello&#10;Dzień - Day&#10;Kot - Cat"></textarea>
+                <textarea id="import-text-area" rows="10" placeholder="Cześć - Hello&#10;Dzień - Day&#10;Kot - Cat&#10;&#10;Or tab-separated (Anki export):&#10;Cześć&#9;Hello&#10;Dzień&#9;Day"></textarea>
             </div>
             <div class="modal-button-row">
                 <button id="btn-import-confirm" class="modal-action-button accent-button">Import</button>
@@ -257,7 +257,7 @@
                     <ul class="info-list">
                         <li><strong>Create decks</strong> — give each deck a name and start adding cards.</li>
                         <li><strong>Import/Export</strong> — save decks as JSON files and reload them later.</li>
-                        <li><strong>Import from text</strong> — paste cards in "Word - Translation" format, one per line.</li>
+                        <li><strong>Import from text</strong> — paste or load cards in "Word - Translation" or tab-separated (Anki export) format, one per line.</li>
                     </ul>
                 </div>
                 <div class="info-section">

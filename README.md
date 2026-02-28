@@ -15,7 +15,7 @@ Open `index.html` in a modern browser. No build tools or dependencies required.
 - **Two Learning Modes** — Simple mode (Remembered / Forgot) and Spaced Repetition (SM-2 algorithm).
 - **Deck Management** — Create, open, and delete multiple decks stored in your browser.
 - **Card Editor** — Add, edit, delete, and search cards within any deck.
-- **Import from .txt** — Create a deck directly from a `.txt` file (one card per line: `Word - Translation`).
+- **Import from .txt** — Create a deck from a `.txt` file. Accepts `Word - Translation` format and tab-separated (Anki export) format.
 - **Import/Export Decks** — Save decks as JSON files and reload them at any time.
 - **Daily Limit** — Configure how many cards to study per day. Extend when you want more.
 - **Undo Last Rating** — Rewind the last card rating if you made a mistake.
@@ -65,15 +65,9 @@ Cards are marked as **To Review** or **Finished**. Each session reviews cards up
 
 ## Importing Decks from a Text File
 
-You can create a deck from a plain `.txt` file without any manual card entry. The file must have one card per line in this format:
+You can create a deck from a plain `.txt` file without any manual card entry. Two formats are supported:
 
-```
-word 1 - word 2
-word 3 - word 4
-```
-
-For example:
-
+**Dash-separated** (default format):
 ```
 Cześć - Hello
 Dzień - Day
@@ -81,12 +75,23 @@ Kot - Cat
 Herbata - Tea
 ```
 
+**Tab-separated** (Anki plain-text export):
+```
+Cześć	Hello
+Dzień	Day
+Kot	Cat
+```
+
+Anki decks can be exported via **File → Export → Notes in Plain Text (.txt)** inside Anki. Extra columns such as tags are ignored automatically, and comment lines beginning with `#` are skipped.
+
+Both formats can be mixed freely in the same file. Lines that cannot be parsed are skipped and reported in the confirmation message.
+
 **How to import:**
 1. Open **Manage Decks**
 2. Click **Import from .txt**
 3. Select your `.txt` file
 
-The deck is created automatically, named after the filename (minus the `.txt` extension). Lines that don't match the `Word - Translation` format are skipped and reported in the confirmation message.
+The deck is created automatically, named after the filename (minus the `.txt` extension).
 
 You can also add cards from a `.txt` file into an *existing* deck via **Edit Cards → Import from Text**, which loads the file into a preview textarea before importing.
 
