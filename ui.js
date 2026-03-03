@@ -13,6 +13,7 @@ const UI = (() => {
     let currentDeck = null;
     let appState = 'NO_DECK';
     let showTranslationFirst = false;
+    let rewindTranslationFirst = false; // tracks which face was shown for the last rated card
 
     // ========================
     // Deck loading
@@ -198,6 +199,7 @@ const UI = (() => {
 
     function onRate(rating) {
         if (appState !== 'SHOW_BACK') return;
+        rewindTranslationFirst = showTranslationFirst; // save before updateState re-rolls it
         Session.rateCard(currentDeck, rating);
         Config.saveDeck(currentDeck);
         updateState();
@@ -207,6 +209,7 @@ const UI = (() => {
         if (!Session.canRewind()) return;
         if (Session.rewind(currentDeck)) {
             Config.saveDeck(currentDeck);
+            showTranslationFirst = rewindTranslationFirst; // restore the original card face
             appState = 'SHOW_FRONT';
             render();
         }
