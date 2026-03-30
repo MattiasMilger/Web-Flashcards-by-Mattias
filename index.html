@@ -156,8 +156,10 @@
             <div class="editor-toolbar">
                 <input type="text" id="card-search" placeholder="Search cards..." class="search-input">
                 <button id="btn-add-card" class="modal-action-button accent-button">Add Card</button>
-                <button id="btn-import-cards-open" class="modal-action-button">Import from Text</button>
+                <button id="btn-import-cards-open" class="modal-action-button">Import from .txt</button>
+                <button id="btn-import-cards-json-trigger" class="modal-action-button">Import from .json</button>
             </div>
+            <input type="file" id="cards-json-file-input" accept=".json" class="hidden-file-input">
             <div class="card-list-container">
                 <div id="card-list" class="card-list"></div>
             </div>
@@ -257,7 +259,8 @@
                     <ul class="info-list">
                         <li><strong>Create decks</strong> — give each deck a name and start adding cards.</li>
                         <li><strong>Import/Export</strong> — save decks as <code>.json</code> or <code>.txt</code> files and reload them later.</li>
-                        <li><strong>Import from text</strong> — paste or load cards in "Word - Translation" or tab-separated (Anki export) format, one per line.</li>
+                        <li><strong>Import from .txt</strong> — paste or load cards in "Word - Translation" or tab-separated (Anki export) format, one per line.</li>
+                        <li><strong>Import from .json</strong> — add cards from a deck <code>.json</code> file into an existing deck via Edit Cards.</li>
                     </ul>
                 </div>
                 <div class="info-section">

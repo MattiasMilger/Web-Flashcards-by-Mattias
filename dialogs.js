@@ -77,6 +77,11 @@ const Dialogs = (() => {
         });
         document.getElementById('btn-add-card').addEventListener('click', openAddCard);
         document.getElementById('btn-import-cards-open').addEventListener('click', openImportCards);
+        document.getElementById('btn-import-cards-json-trigger').addEventListener('click', () => {
+            document.getElementById('cards-json-file-input').value = '';
+            document.getElementById('cards-json-file-input').click();
+        });
+        document.getElementById('cards-json-file-input').addEventListener('change', handleCardsJsonImportFile);
 
         // Card add/edit
         document.getElementById('btn-card-save').addEventListener('click', saveCard);
@@ -491,6 +496,49 @@ const Dialogs = (() => {
         reader.onload = e => {
             document.getElementById('import-text-area').value = e.target.result;
             document.getElementById('import-file-name').textContent = file.name;
+        };
+        reader.readAsText(file);
+    }
+
+    function handleCardsJsonImportFile(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const deck = UI.getCurrentDeck();
+        if (!deck) return;
+
+        const reader = new FileReader();
+        reader.onload = e => {
+            try {
+                const data = JSON.parse(e.target.result);
+                if (!Array.isArray(data.cards)) {
+                    UI.showMessage('Invalid deck file: missing cards array.', 'error');
+                    return;
+                }
+
+                let added = 0;
+                data.cards.forEach(card => {
+                    const word        = card.word || '';
+                    const translation = card.translation || '';
+                    if (word || translation) {
+                        deck.cards.push({
+                            word,
+                            translation,
+                            sessionStatus: 'TO_REVIEW',
+                            dueDate:       null,
+                            interval:      1,
+                            easeFactor:    2.5
+                        });
+                        added++;
+                    }
+                });
+
+                Config.saveDeck(deck);
+                renderCardList(deck.cards, document.getElementById('card-search').value.trim());
+                UI.showMessage(`${added} card(s) imported from "${file.name}".`, added > 0 ? 'success' : 'warning');
+            } catch (err) {
+                UI.showMessage('Failed to parse .json file: ' + err.message, 'error');
+            }
         };
         reader.readAsText(file);
     }
