@@ -101,6 +101,35 @@ const Config = (() => {
         save();
     }
 
+    /**
+     * Rename a deck: copies data under the new key, removes the old key,
+     * and updates all references in config. Returns true on success.
+     */
+    function renameDeck(oldName, newName) {
+        if (!oldName || !newName || oldName === newName) return false;
+        if (config.deckNames.includes(newName)) return false;
+
+        const deck = loadDeck(oldName);
+        if (!deck) return false;
+
+        // Write under new name, remove old key
+        deck.name = newName;
+        localStorage.setItem(deckKey(newName), JSON.stringify(deck));
+        localStorage.removeItem(deckKey(oldName));
+
+        // Update deckNames list in place (preserves order)
+        const idx = config.deckNames.indexOf(oldName);
+        if (idx !== -1) config.deckNames[idx] = newName;
+
+        // Update current deck pointer if needed
+        if (config.currentDeckName === oldName) {
+            config.currentDeckName = newName;
+        }
+
+        save();
+        return true;
+    }
+
     function createEmptyDeck(name) {
         return {
             name,
@@ -202,6 +231,7 @@ const Config = (() => {
         loadDeck,
         saveDeck,
         deleteDeck,
+        renameDeck,
         createEmptyDeck,
         exportDeckTxt,
         exportDeck,

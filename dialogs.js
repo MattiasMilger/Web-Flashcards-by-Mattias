@@ -36,7 +36,7 @@ const Dialogs = (() => {
         });
 
         // Click outside modal-content to close (except deck/card editor modals)
-        const noBackgroundClose = ['deck-manager-modal', 'card-editor-modal'];
+        const noBackgroundClose = ['deck-manager-modal', 'card-editor-modal', 'rename-deck-modal'];
         document.querySelectorAll('.modal').forEach(modal => {
             if (noBackgroundClose.includes(modal.id)) return;
             modal.addEventListener('click', e => {
@@ -53,6 +53,7 @@ const Dialogs = (() => {
         // Deck manager
         document.getElementById('btn-deck-open').addEventListener('click', openSelectedDeck);
         document.getElementById('btn-deck-new').addEventListener('click', openNewDeckModal);
+        document.getElementById('btn-deck-rename').addEventListener('click', openRenameDeckModal);
         document.getElementById('btn-deck-delete').addEventListener('click', deleteSelectedDeck);
         document.getElementById('btn-deck-export').addEventListener('click', exportSelectedDeck);
         document.getElementById('btn-deck-export-txt').addEventListener('click', exportSelectedDeckTxt);
@@ -70,6 +71,12 @@ const Dialogs = (() => {
             if (e.key === 'Enter') createNewDeck();
         });
 
+        // Rename deck
+        document.getElementById('btn-rename-deck-confirm').addEventListener('click', confirmRenameDeck);
+        document.getElementById('rename-deck-name').addEventListener('keydown', e => {
+            if (e.key === 'Enter') confirmRenameDeck();
+        });
+
         // Card editor
         document.getElementById('card-search').addEventListener('input', () => {
             const deck = UI.getCurrentDeck();
@@ -77,11 +84,6 @@ const Dialogs = (() => {
         });
         document.getElementById('btn-add-card').addEventListener('click', openAddCard);
         document.getElementById('btn-import-cards-open').addEventListener('click', openImportCards);
-        document.getElementById('btn-import-cards-json-trigger').addEventListener('click', () => {
-            document.getElementById('cards-json-file-input').value = '';
-            document.getElementById('cards-json-file-input').click();
-        });
-        document.getElementById('cards-json-file-input').addEventListener('change', handleCardsJsonImportFile);
 
         // Card add/edit
         document.getElementById('btn-card-save').addEventListener('click', saveCard);
@@ -187,6 +189,53 @@ const Dialogs = (() => {
         UI.openDeck(name);
         closeModal('deck-manager-modal');
         UI.showMessage(`Deck "${name}" created.`, 'success');
+    }
+
+    function openRenameDeckModal() {
+        const listbox  = document.getElementById('deck-listbox');
+        const selected = listbox.value;
+        if (!selected) { UI.showMessage('Please select a deck to rename.', 'warning'); return; }
+
+        document.getElementById('rename-deck-name').value = selected;
+        openModal('rename-deck-modal');
+        setTimeout(() => {
+            const input = document.getElementById('rename-deck-name');
+            input.focus();
+            input.select();
+        }, 50);
+    }
+
+    function confirmRenameDeck() {
+        const listbox  = document.getElementById('deck-listbox');
+        const oldName  = listbox.value;
+        const newName  = document.getElementById('rename-deck-name').value.trim();
+
+        if (!newName) { UI.showMessage('Please enter a new deck name.', 'error'); return; }
+        if (newName === oldName) { closeModal('rename-deck-modal'); return; }
+
+        if (Config.getDeckNames().includes(newName)) {
+            UI.showMessage(`A deck named "${newName}" already exists.`, 'error');
+            return;
+        }
+
+        const success = Config.renameDeck(oldName, newName);
+        if (!success) {
+            UI.showMessage('Failed to rename deck.', 'error');
+            return;
+        }
+
+        // If the renamed deck is currently open, update the in-memory reference
+        const currentDeck = UI.getCurrentDeck();
+        if (currentDeck && currentDeck.name === oldName) {
+            currentDeck.name = newName;
+            UI.renderDeckStatus();
+        }
+
+        closeModal('rename-deck-modal');
+        refreshDeckList();
+        // Re-select the renamed deck in the listbox
+        listbox.value = newName;
+        UI.showMessage(`Deck renamed to "${newName}".`, 'success', 3000);
     }
 
     function deleteSelectedDeck() {
@@ -496,49 +545,6 @@ const Dialogs = (() => {
         reader.onload = e => {
             document.getElementById('import-text-area').value = e.target.result;
             document.getElementById('import-file-name').textContent = file.name;
-        };
-        reader.readAsText(file);
-    }
-
-    function handleCardsJsonImportFile(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-
-        const deck = UI.getCurrentDeck();
-        if (!deck) return;
-
-        const reader = new FileReader();
-        reader.onload = e => {
-            try {
-                const data = JSON.parse(e.target.result);
-                if (!Array.isArray(data.cards)) {
-                    UI.showMessage('Invalid deck file: missing cards array.', 'error');
-                    return;
-                }
-
-                let added = 0;
-                data.cards.forEach(card => {
-                    const word        = card.word || '';
-                    const translation = card.translation || '';
-                    if (word || translation) {
-                        deck.cards.push({
-                            word,
-                            translation,
-                            sessionStatus: 'TO_REVIEW',
-                            dueDate:       null,
-                            interval:      1,
-                            easeFactor:    2.5
-                        });
-                        added++;
-                    }
-                });
-
-                Config.saveDeck(deck);
-                renderCardList(deck.cards, document.getElementById('card-search').value.trim());
-                UI.showMessage(`${added} card(s) imported from "${file.name}".`, added > 0 ? 'success' : 'warning');
-            } catch (err) {
-                UI.showMessage('Failed to parse .json file: ' + err.message, 'error');
-            }
         };
         reader.readAsText(file);
     }

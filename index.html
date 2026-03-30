@@ -118,6 +118,7 @@
             <div class="modal-button-row">
                 <button id="btn-deck-open" class="modal-action-button accent-button">Open Selected</button>
                 <button id="btn-deck-new" class="modal-action-button">New Deck</button>
+                <button id="btn-deck-rename" class="modal-action-button">Rename Selected</button>
                 <button id="btn-deck-delete" class="modal-action-button danger-button">Delete Selected</button>
             </div>
             <div class="modal-button-row">
@@ -148,6 +149,22 @@
         </div>
     </div>
 
+    <!-- Rename Deck Modal -->
+    <div id="rename-deck-modal" class="modal hidden">
+        <div class="modal-content modal-small">
+            <span class="close-button" data-modal="rename-deck-modal">&times;</span>
+            <h2>Rename Deck</h2>
+            <div class="form-group">
+                <label for="rename-deck-name">New Name:</label>
+                <input type="text" id="rename-deck-name" placeholder="e.g., Polish Words" maxlength="80">
+            </div>
+            <div class="modal-button-row">
+                <button id="btn-rename-deck-confirm" class="modal-action-button accent-button">Rename</button>
+                <button class="modal-action-button" data-modal="rename-deck-modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Card Editor Modal -->
     <div id="card-editor-modal" class="modal hidden">
         <div class="modal-content modal-large">
@@ -156,10 +173,8 @@
             <div class="editor-toolbar">
                 <input type="text" id="card-search" placeholder="Search cards..." class="search-input">
                 <button id="btn-add-card" class="modal-action-button accent-button">Add Card</button>
-                <button id="btn-import-cards-open" class="modal-action-button">Import from .txt</button>
-                <button id="btn-import-cards-json-trigger" class="modal-action-button">Import from .json</button>
+                <button id="btn-import-cards-open" class="modal-action-button">Import from Text</button>
             </div>
-            <input type="file" id="cards-json-file-input" accept=".json" class="hidden-file-input">
             <div class="card-list-container">
                 <div id="card-list" class="card-list"></div>
             </div>
@@ -258,9 +273,9 @@
                     <strong>Deck Management</strong>
                     <ul class="info-list">
                         <li><strong>Create decks</strong> — give each deck a name and start adding cards.</li>
+                        <li><strong>Rename deck</strong> — select a deck in Manage Decks and click Rename Selected to give it a new name.</li>
                         <li><strong>Import/Export</strong> — save decks as <code>.json</code> or <code>.txt</code> files and reload them later.</li>
-                        <li><strong>Import from .txt</strong> — paste or load cards in "Word - Translation" or tab-separated (Anki export) format, one per line.</li>
-                        <li><strong>Import from .json</strong> — add cards from a deck <code>.json</code> file into an existing deck via Edit Cards.</li>
+                        <li><strong>Import from text</strong> — paste or load cards in "Word - Translation" or tab-separated (Anki export) format, one per line.</li>
                     </ul>
                 </div>
                 <div class="info-section">

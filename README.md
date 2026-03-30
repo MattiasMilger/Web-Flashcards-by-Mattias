@@ -13,7 +13,7 @@ Open `index.html` in a modern browser. No build tools or dependencies required.
 ## Features
 
 - **Two Learning Modes** — Simple mode (Remembered / Forgot) and Spaced Repetition (SM-2 algorithm).
-- **Deck Management** — Create, open, and delete multiple decks stored in your browser.
+- **Deck Management** — Create, open, rename, and delete multiple decks stored in your browser.
 - **Card Editor** — Add, edit, delete, and search cards within any deck.
 - **Import from .txt** — Create a deck from a `.txt` file. Accepts `Word - Translation` format and tab-separated (Anki export) format.
 - **Import/Export Decks** — Save decks as `.json` or `.txt` files and reload them at any time.
@@ -103,6 +103,10 @@ You can also add cards from a `.txt` file into an *existing* deck via **Edit Car
 4. **Rate the card** using the buttons or keyboard shortcuts (1–4). The card is updated and saved immediately.
 5. **Undo** the last rating at any time with the "↩ Undo Last Rating" button.
 6. When the session ends, use **Study More Cards** to extend the session.
+
+## Renaming a Deck
+
+Select any deck in **Manage Decks** and click **Rename Selected**. Enter the new name and press Enter or click Rename. The deck's cards and progress are preserved; the name is updated everywhere including the status bar if the deck is currently open.
 
 ## Keyboard Shortcuts
 
