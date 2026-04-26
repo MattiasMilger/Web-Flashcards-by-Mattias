@@ -173,7 +173,7 @@
             <div class="editor-toolbar">
                 <input type="text" id="card-search" placeholder="Search cards..." class="search-input">
                 <button id="btn-add-card" class="modal-action-button accent-button">Add Card</button>
-                <button id="btn-import-cards-open" class="modal-action-button">Import from Text</button>
+                <button id="btn-import-cards-open" class="modal-action-button">Import Cards</button>
             </div>
             <div class="card-list-container">
                 <div id="card-list" class="card-list"></div>
@@ -209,18 +209,20 @@
     <div id="import-cards-modal" class="modal hidden">
         <div class="modal-content">
             <span class="close-button" data-modal="import-cards-modal">&times;</span>
-            <h2>Import Cards from Text</h2>
-            <p class="modal-subtitle">One card per line: <strong>Word - Translation</strong> or tab-separated (Anki export).</p>
+            <h2>Import Cards</h2>
+            <p class="modal-subtitle">Import from a <strong>.json</strong> deck file, a <strong>.txt</strong> file, or paste text below (<strong>Word - Translation</strong> or tab-separated).</p>
             <div class="form-group">
                 <div class="import-file-row">
+                    <button id="btn-import-json-file" class="modal-action-button">Choose .json File</button>
                     <button id="btn-import-txt-file" class="modal-action-button">Choose .txt File</button>
                     <span id="import-file-name" class="import-file-label">or paste text below</span>
                 </div>
+                <input type="file" id="import-json-file-input" accept=".json" class="hidden-file-input">
                 <input type="file" id="import-txt-file-input" accept=".txt" class="hidden-file-input">
                 <textarea id="import-text-area" rows="10" placeholder="Cześć - Hello&#10;Dzień - Day&#10;Kot - Cat&#10;&#10;Or tab-separated (Anki export):&#10;Cześć&#9;Hello&#10;Dzień&#9;Day"></textarea>
             </div>
             <div class="modal-button-row">
-                <button id="btn-import-confirm" class="modal-action-button accent-button">Import</button>
+                <button id="btn-import-confirm" class="modal-action-button accent-button">Import Text</button>
                 <button class="modal-action-button" data-modal="import-cards-modal">Cancel</button>
             </div>
         </div>

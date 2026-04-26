@@ -102,6 +102,13 @@ const Dialogs = (() => {
         });
         document.getElementById('import-txt-file-input').addEventListener('change', handleImportTxtFile);
 
+        // Import from JSON (card editor)
+        document.getElementById('btn-import-json-file').addEventListener('click', () => {
+            document.getElementById('import-json-file-input').value = '';
+            document.getElementById('import-json-file-input').click();
+        });
+        document.getElementById('import-json-file-input').addEventListener('change', handleImportJsonFile);
+
         // Settings
         document.getElementById('btn-settings-save').addEventListener('click', saveSettings);
         document.getElementById('btn-extend-confirm').addEventListener('click', extendSessionFromSettings);
@@ -545,6 +552,62 @@ const Dialogs = (() => {
         reader.onload = e => {
             document.getElementById('import-text-area').value = e.target.result;
             document.getElementById('import-file-name').textContent = file.name;
+        };
+        reader.readAsText(file);
+    }
+
+    function handleImportJsonFile(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const deck = UI.getCurrentDeck();
+        if (!deck) return;
+
+        const reader = new FileReader();
+        reader.onload = e => {
+            let data;
+            try {
+                data = JSON.parse(e.target.result);
+            } catch (err) {
+                UI.showMessage('Failed to parse .json file: ' + err.message, 'error');
+                return;
+            }
+
+            const result = Config.importDeck(data);
+            if (typeof result === 'string') {
+                UI.showMessage(result, 'error');
+                return;
+            }
+
+            // Merge cards into current deck, skipping exact duplicates
+            let added = 0;
+            let skipped = 0;
+            result.cards.forEach(importedCard => {
+                const isDuplicate = deck.cards.some(
+                    c => c.word === importedCard.word && c.translation === importedCard.translation
+                );
+                if (isDuplicate) {
+                    skipped++;
+                } else {
+                    deck.cards.push({
+                        word:          importedCard.word,
+                        translation:   importedCard.translation,
+                        sessionStatus: 'TO_REVIEW',
+                        dueDate:       null,
+                        interval:      1,
+                        easeFactor:    2.5
+                    });
+                    added++;
+                }
+            });
+
+            Config.saveDeck(deck);
+            closeModal('import-cards-modal');
+            renderCardList(deck.cards, document.getElementById('card-search').value.trim());
+
+            let msg = `${added} card(s) imported from "${file.name}".`;
+            if (skipped > 0) msg += ` ${skipped} duplicate(s) skipped.`;
+            UI.showMessage(msg, added > 0 ? 'success' : 'warning');
         };
         reader.readAsText(file);
     }
