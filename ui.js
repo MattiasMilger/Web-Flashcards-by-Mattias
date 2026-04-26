@@ -157,7 +157,16 @@ const UI = (() => {
     function renderComplete() {
         const title    = document.getElementById('complete-title');
         const subtitle = document.getElementById('complete-subtitle');
+        const btnRewindComplete = document.getElementById('btn-rewind-complete');
         const stats    = Session.getDeckStats(currentDeck);
+
+        if (btnRewindComplete) {
+            if (Session.canRewind()) {
+                btnRewindComplete.classList.remove('hidden');
+            } else {
+                btnRewindComplete.classList.add('hidden');
+            }
+        }
 
         if (stats.mode === 'simple') {
             if (stats.toReview === 0) {
@@ -314,6 +323,7 @@ const UI = (() => {
         document.getElementById('btn-show-answer').addEventListener('click', onShowAnswer);
         document.getElementById('btn-back-to-front').addEventListener('click', onBackToFront);
         document.getElementById('btn-rewind').addEventListener('click', onRewind);
+        document.getElementById('btn-rewind-complete').addEventListener('click', onRewind);
         document.getElementById('btn-extend-session-main').addEventListener('click', onExtendSession);
 
         // Rating buttons
