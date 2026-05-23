@@ -244,6 +244,13 @@
                 </div>
             </div>
             <div class="form-group">
+                <label>Accumulate Daily Limit:</label>
+                <div class="radio-group">
+                    <label><input type="radio" name="accumulate-limit" value="no" checked> No</label>
+                    <label><input type="radio" name="accumulate-limit" value="yes"> Yes</label>
+                </div>
+            </div>
+            <div class="form-group">
                 <label for="daily-limit-input">Daily Card Limit:</label>
                 <input type="number" id="daily-limit-input" min="1" max="500" value="5">
             </div>
@@ -300,6 +307,15 @@
                         <li>Review cards one by one. Rate each as <strong>Remembered</strong> or <strong>Forgot</strong>.</li>
                         <li>Remembered cards move to Finished. Forgot cards stay in the queue.</li>
                         <li>Session ends when the daily limit is reached or all cards are finished.</li>
+                    </ul>
+                </div>
+                <div class="info-section">
+                    <strong>Accumulate Daily Limit</strong>
+                    <ul class="info-list">
+                        <li>When set to <strong>Yes</strong>, any cards you didn't study on a given day carry over and are added to the next day's limit.</li>
+                        <li>For example, with a daily limit of 8 and no cards studied for three days, you'll have 24 cards queued on day four.</li>
+                        <li>When set to <strong>No</strong> (default), each day starts fresh with exactly the daily limit regardless of missed days.</li>
+                        <li>Turning this setting off clears any currently accumulated cards.</li>
                     </ul>
                 </div>
                 <div class="info-section">

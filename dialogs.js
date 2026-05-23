@@ -656,13 +656,18 @@ const Dialogs = (() => {
 
     function openSettings() {
         const deck = UI.getCurrentDeck();
-        const mode  = deck ? deck.learningMode : Config.DEFAULT_LEARNING_MODE;
-        const limit = deck ? deck.dailyLimit   : Config.DEFAULT_DAILY_LIMIT;
+        const mode       = deck ? deck.learningMode        : Config.DEFAULT_LEARNING_MODE;
+        const limit      = deck ? deck.dailyLimit          : Config.DEFAULT_DAILY_LIMIT;
+        const accumulate = deck ? !!deck.accumulateDailyLimit : false;
 
         document.querySelectorAll('input[name="learning-mode"]').forEach(r => {
             r.checked = r.value === mode;
         });
         document.getElementById('daily-limit-input').value = limit;
+
+        document.querySelectorAll('input[name="accumulate-limit"]').forEach(r => {
+            r.checked = r.value === (accumulate ? 'yes' : 'no');
+        });
 
         // Show extend only when a deck is active
         const extendGroup = document.getElementById('extend-session-group');
@@ -680,11 +685,16 @@ const Dialogs = (() => {
         const mode       = modeInput ? modeInput.value : Config.DEFAULT_LEARNING_MODE;
         const limitInput = parseInt(document.getElementById('daily-limit-input').value, 10);
         const limit      = isNaN(limitInput) ? Config.DEFAULT_DAILY_LIMIT : Math.max(1, Math.min(500, limitInput));
+        const accumInput = document.querySelector('input[name="accumulate-limit"]:checked');
+        const accumulate = accumInput ? accumInput.value === 'yes' : false;
 
         const deck = UI.getCurrentDeck();
         if (deck) {
-            deck.learningMode = mode;
-            deck.dailyLimit   = limit;
+            deck.learningMode        = mode;
+            deck.dailyLimit          = limit;
+            deck.accumulateDailyLimit = accumulate;
+            // If accumulation is turned off, clear any stored extra
+            if (!accumulate) deck.accumulatedExtra = 0;
             Config.saveDeck(deck);
             Session.buildQueue(deck);
             UI.updateState();

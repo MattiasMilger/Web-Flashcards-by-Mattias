@@ -336,9 +336,8 @@ const UI = (() => {
 
         // Card click — copy text to clipboard
         document.getElementById('card-display').addEventListener('click', () => {
-            const card = Session.getCurrentCard();
-            if (!card) return;
-            const text = appState === 'SHOW_FRONT' ? card.word : card.translation;
+            if (!Session.getCurrentCard()) return;
+            const text = document.getElementById('card-text').textContent;
             if (navigator.clipboard) {
                 navigator.clipboard.writeText(text).then(() => {
                     showMessage('Copied!', 'success', 1500);

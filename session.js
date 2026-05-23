@@ -28,10 +28,21 @@ const Session = (() => {
 
     /**
      * If the deck was last used on a previous day, reset daily counters.
+     * If accumulateDailyLimit is enabled, carry over cards not studied.
      */
     function checkDayReset(deck) {
         const today = getTodayStr();
         if (deck.lastSessionDate !== today) {
+            if (deck.accumulateDailyLimit && deck.lastSessionDate) {
+                // Cards missed = limit - how many were actually done (clamped to 0)
+                const limit = (deck.dailyLimit || 5) + (deck.sessionExtension || 0);
+                const done  = deck.cardsReviewedToday || 0;
+                const missed = Math.max(0, limit - done);
+                deck.accumulatedExtra = (deck.accumulatedExtra || 0) + missed;
+            } else if (!deck.accumulateDailyLimit) {
+                // Reset accumulation when feature is off
+                deck.accumulatedExtra = 0;
+            }
             deck.lastSessionDate = today;
             deck.cardsReviewedToday = 0;
             deck.sessionExtension = 0;
@@ -50,7 +61,7 @@ const Session = (() => {
         checkDayReset(deck);
 
         const today = getTodayStr();
-        const effectiveLimit = (deck.dailyLimit || 5) + (deck.sessionExtension || 0);
+        const effectiveLimit = (deck.dailyLimit || 5) + (deck.sessionExtension || 0) + (deck.accumulatedExtra || 0);
         const alreadyDone = deck.cardsReviewedToday || 0;
         const remaining = Math.max(0, effectiveLimit - alreadyDone);
 
@@ -121,7 +132,8 @@ const Session = (() => {
             index: currentIndex,
             cardSnapshot: { ...deckCard },
             deckCardRef: deckCard,
-            cardsReviewedToday: deck.cardsReviewedToday || 0
+            cardsReviewedToday: deck.cardsReviewedToday || 0,
+            accumulatedExtra: deck.accumulatedExtra || 0
         };
 
         const today = getTodayStr();
@@ -137,6 +149,10 @@ const Session = (() => {
         }
 
         deck.cardsReviewedToday = (deck.cardsReviewedToday || 0) + 1;
+        // Drain accumulated extra before counting against the base daily limit
+        if ((deck.accumulatedExtra || 0) > 0) {
+            deck.accumulatedExtra = deck.accumulatedExtra - 1;
+        }
         currentIndex++;
     }
 
@@ -179,7 +195,7 @@ const Session = (() => {
     function rewind(deck) {
         if (!rewindBackup) return false;
 
-        const { index, cardSnapshot, deckCardRef, cardsReviewedToday } = rewindBackup;
+        const { index, cardSnapshot, deckCardRef, cardsReviewedToday, accumulatedExtra } = rewindBackup;
 
         // Restore card state
         Object.assign(deckCardRef, cardSnapshot);
@@ -188,8 +204,9 @@ const Session = (() => {
         queue[index] = deckCardRef;
         currentIndex = index;
 
-        // Restore counter
+        // Restore counters
         deck.cardsReviewedToday = cardsReviewedToday;
+        if (accumulatedExtra !== undefined) deck.accumulatedExtra = accumulatedExtra;
 
         rewindBackup = null;
         return true;

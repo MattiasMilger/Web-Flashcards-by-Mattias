@@ -135,10 +135,12 @@ const Config = (() => {
             name,
             dailyLimit: DEFAULT_DAILY_LIMIT,
             learningMode: DEFAULT_LEARNING_MODE,
+            accumulateDailyLimit: false,
             cards: [],
             lastSessionDate: null,
             cardsReviewedToday: 0,
-            sessionExtension: 0
+            sessionExtension: 0,
+            accumulatedExtra: 0
         };
     }
 
@@ -214,9 +216,11 @@ const Config = (() => {
         // Normalize deck-level fields
         data.dailyLimit = data.dailyLimit || data.daily_limit || DEFAULT_DAILY_LIMIT;
         data.learningMode = data.learningMode || data.learning_mode || DEFAULT_LEARNING_MODE;
+        data.accumulateDailyLimit = data.accumulateDailyLimit || false;
         data.lastSessionDate = data.lastSessionDate || data.last_session_date || null;
         data.cardsReviewedToday = data.cardsReviewedToday || data.cards_reviewed_today || 0;
         data.sessionExtension = data.sessionExtension || data.session_extension || 0;
+        data.accumulatedExtra = data.accumulatedExtra || 0;
 
         return data;
     }
