@@ -1,5 +1,5 @@
 /**
- * dialogs.js — Modal dialog management
+ * dialogs.js - Modal dialog management
  * Handles deck manager, card editor, card add/edit, import from text, and settings.
  */
 
@@ -149,7 +149,7 @@ const Dialogs = (() => {
         if (names.length === 0) {
             const opt = document.createElement('option');
             opt.disabled = true;
-            opt.textContent = '(No decks yet — create or import one)';
+            opt.textContent = '(No decks yet - create or import one)';
             listbox.appendChild(opt);
             return;
         }
@@ -160,7 +160,7 @@ const Dialogs = (() => {
             const mode  = deck ? (deck.learningMode === 'spaced' ? ' [Spaced]' : ' [Simple]') : '';
             const opt   = document.createElement('option');
             opt.value   = name;
-            opt.textContent = `${name}${mode} — ${count} card${count !== 1 ? 's' : ''}${name === currentName ? ' ✓' : ''}`;
+            opt.textContent = `${name}${mode} - ${count} card${count !== 1 ? 's' : ''}${name === currentName ? ' ✓' : ''}`;
             listbox.appendChild(opt);
         });
     }
@@ -422,12 +422,12 @@ const Dialogs = (() => {
             const row = document.createElement('div');
             row.className = 'card-row';
 
-            // Word — Translation
+            // Word - Translation
             const info = document.createElement('div');
             info.className = 'card-row-info';
             info.innerHTML =
                 `<span class="card-word">${escHtml(card.word)}</span>` +
-                `<span class="card-sep"> — </span>` +
+                `<span class="card-sep"> - </span>` +
                 `<span class="card-translation">${escHtml(card.translation)}</span>`;
 
             // Status badge
@@ -525,7 +525,7 @@ const Dialogs = (() => {
         if (!deck || idx < 0 || idx >= deck.cards.length) return;
 
         const card = deck.cards[idx];
-        if (!confirm(`Delete "${card.word} — ${card.translation}"?`)) return;
+        if (!confirm(`Delete "${card.word} - ${card.translation}"?`)) return;
 
         deck.cards.splice(idx, 1);
         Config.saveDeck(deck);

@@ -1,5 +1,5 @@
 /**
- * config.js — Configuration and deck management
+ * config.js - Configuration and deck management
  * Stores app config and individual decks in localStorage.
  */
 

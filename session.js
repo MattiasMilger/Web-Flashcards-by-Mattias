@@ -1,5 +1,5 @@
 /**
- * session.js — Session logic and SM-2 spaced repetition algorithm
+ * session.js - Session logic and SM-2 spaced repetition algorithm
  * Handles queue building, card rating, rewind, and deck statistics.
  */
 

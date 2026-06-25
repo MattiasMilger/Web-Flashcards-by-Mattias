@@ -12,18 +12,18 @@ Open `index.html` in a modern browser. No build tools or dependencies required.
 
 ## Features
 
-- **Two Learning Modes** — Simple mode (Remembered / Forgot) and Spaced Repetition (SM-2 algorithm).
-- **Deck Management** — Create, open, rename, and delete multiple decks stored in your browser.
-- **Card Editor** — Add, edit, delete, and search cards within any deck.
-- **Import from .txt** — Create a deck from a `.txt` file. Accepts `Word - Translation` format and tab-separated (Anki export) format.
-- **Import/Export Decks** — Save decks as `.json` or `.txt` files and reload them at any time.
-- **Daily Limit** — Configure how many cards to study per day. Extend when you want more.
-- **Undo Last Rating** — Rewind the last card rating if you made a mistake.
-- **Keyboard Shortcuts** — Space/Enter to show answer; 1–4 to rate cards.
-- **Click to Copy** — Click the card to copy its text to clipboard.
-- **Dark / Light Theme** — Toggle between dark and light modes (dark by default).
-- **Responsive Design** — Works on desktop and mobile devices.
-- **Persistent Storage** — All data saved in your browser's `localStorage`.
+- **Two Learning Modes** - Simple mode (Remembered / Forgot) and Spaced Repetition (SM-2 algorithm).
+- **Deck Management** - Create, open, rename, and delete multiple decks stored in your browser.
+- **Card Editor** - Add, edit, delete, and search cards within any deck.
+- **Import from .txt** - Create a deck from a `.txt` file. Accepts `Word - Translation` format and tab-separated (Anki export) format.
+- **Import/Export Decks** - Save decks as `.json` or `.txt` files and reload them at any time.
+- **Daily Limit** - Configure how many cards to study per day. Extend when you want more.
+- **Undo Last Rating** - Rewind the last card rating if you made a mistake.
+- **Keyboard Shortcuts** - Space/Enter to show answer; 1–4 to rate cards.
+- **Click to Copy** - Click the card to copy its text to clipboard.
+- **Dark / Light Theme** - Toggle between dark and light modes (dark by default).
+- **Responsive Design** - Works on desktop and mobile devices.
+- **Persistent Storage** - All data saved in your browser's `localStorage`.
 
 ## Project Structure
 
@@ -49,19 +49,19 @@ Web Flashcards by Mattias/
 
 ## Learning Modes
 
-### Spaced Repetition (SM-2) — Default
+### Spaced Repetition (SM-2) - Default
 Cards are scheduled based on your performance. Rate each card as:
-- **Again** (<10m) — failed, shown again soon.
-- **Hard** (1–2d) — struggled, short interval.
-- **Good** (3–7d) — normal, standard interval.
-- **Easy** (7d+) — easy, long interval.
+- **Again** (<10m) - failed, shown again soon.
+- **Hard** (1–2d) - struggled, short interval.
+- **Good** (3–7d) - normal, standard interval.
+- **Easy** (7d+) - easy, long interval.
 
 The interval between reviews grows each time you rate a card as Good or Easy, following the SM-2 algorithm. Cards only appear when they are due.
 
 ### Simple Mode
 Cards are marked as **To Review** or **Finished**. Each session reviews cards up to the daily limit. Rate each card as:
-- **Remembered** — card moves to Finished.
-- **Forgot** — card stays in the queue.
+- **Remembered** - card moves to Finished.
+- **Forgot** - card stays in the queue.
 
 ## Importing Decks from a Text File
 
@@ -121,9 +121,9 @@ Select any deck in **Manage Decks** and click **Rename Selected**. Enter the new
 
 ## Technical Notes
 
-- **No external dependencies** — pure vanilla HTML, CSS, and JavaScript.
-- **localStorage** — All decks and settings persist in the browser. Clearing browser data will erase your decks — export them as JSON first.
-- **JSON format** — Deck files are compatible with the desktop *Flashcards by Mattias* Python app (with automatic field normalization on import).
+- **No external dependencies** - pure vanilla HTML, CSS, and JavaScript.
+- **localStorage** - All decks and settings persist in the browser. Clearing browser data will erase your decks - export them as JSON first.
+- **JSON format** - Deck files are compatible with the desktop *Flashcards by Mattias* Python app (with automatic field normalization on import).
 
 ## Browser Support
 

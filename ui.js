@@ -1,12 +1,12 @@
 /**
- * ui.js — Main UI controller
+ * ui.js - Main UI controller
  * Manages application state, card rendering, and wires up all interactions.
  *
  * App states:
- *   NO_DECK          — no deck loaded
- *   SHOW_FRONT       — showing card front (question)
- *   SHOW_BACK        — showing card back (answer) + rating buttons
- *   SESSION_COMPLETE — all cards for today reviewed
+ *   NO_DECK          - no deck loaded
+ *   SHOW_FRONT       - showing card front (question)
+ *   SHOW_BACK        - showing card back (answer) + rating buttons
+ *   SESSION_COMPLETE - all cards for today reviewed
  */
 
 const UI = (() => {
@@ -334,7 +334,7 @@ const UI = (() => {
         document.getElementById('btn-good').addEventListener('click',       () => onRate('good'));
         document.getElementById('btn-easy').addEventListener('click',       () => onRate('easy'));
 
-        // Card click — copy text to clipboard
+        // Card click - copy text to clipboard
         document.getElementById('card-display').addEventListener('click', () => {
             if (!Session.getCurrentCard()) return;
             const text = document.getElementById('card-text').textContent;
