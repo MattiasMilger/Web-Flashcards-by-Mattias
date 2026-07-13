@@ -185,7 +185,7 @@ const UI = (() => {
             } else {
                 title.textContent    = 'Session Complete!';
                 subtitle.textContent =
-                    `Daily limit reached. ${stats.due} card(s) still due today.`;
+                    `Daily limit reached.`;
             }
         }
     }
