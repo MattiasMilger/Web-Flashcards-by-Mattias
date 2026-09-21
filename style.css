@@ -521,6 +521,11 @@ body.dark-mode .message-area.success {
     font-size: 1.5em;
 }
 
+.modal-content.modal-danger h2 {
+    color: var(--error-color);
+    border-bottom-color: var(--error-color);
+}
+
 .modal-subtitle {
     font-size: 0.9em;
     color: var(--summary-color);
@@ -708,6 +713,15 @@ body.dark-mode .message-area.success {
     background-color: color-mix(in srgb, var(--error-color) 80%, black);
 }
 
+.modal-action-button:disabled,
+.modal-action-button:disabled:hover {
+    opacity: 0.45;
+    cursor: not-allowed;
+    background-color: var(--button-bg);
+    color: var(--summary-color);
+    border-color: var(--border-color);
+}
+
 .hidden-file-input {
     display: none;
 }
@@ -718,8 +732,8 @@ body.dark-mode .message-area.success {
     font-weight: bold;
     margin-bottom: 8px;
     padding-top: 10px;
-    border-top: 1px solid var(--border-color);
-    color: var(--fg-color);
+    border-top: 1px solid var(--error-color);
+    color: var(--error-color);
 }
 
 /* --- Import file row --- */

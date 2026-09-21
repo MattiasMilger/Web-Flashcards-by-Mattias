@@ -51,9 +51,11 @@ const Dialogs = (() => {
 
     function initEventListeners() {
         // Deck manager
+        document.getElementById('deck-listbox').addEventListener('change', updateProtectButtonLabel);
         document.getElementById('btn-deck-open').addEventListener('click', openSelectedDeck);
         document.getElementById('btn-deck-new').addEventListener('click', openNewDeckModal);
         document.getElementById('btn-deck-rename').addEventListener('click', openRenameDeckModal);
+        document.getElementById('btn-deck-protect').addEventListener('click', toggleSelectedDeckProtected);
         document.getElementById('btn-deck-delete').addEventListener('click', deleteSelectedDeck);
         document.getElementById('btn-deck-export').addEventListener('click', exportSelectedDeck);
         document.getElementById('btn-deck-export-txt').addEventListener('click', exportSelectedDeckTxt);
@@ -114,6 +116,11 @@ const Dialogs = (() => {
         document.getElementById('btn-extend-confirm').addEventListener('click', extendSessionFromSettings);
         document.getElementById('btn-reset-cards').addEventListener('click', resetDeckCards);
 
+        // Reset App (discreet, guarded action)
+        document.getElementById('btn-reset-app-open').addEventListener('click', openResetAppModal);
+        document.getElementById('reset-confirm-input').addEventListener('input', updateResetConfirmButton);
+        document.getElementById('btn-reset-app-confirm').addEventListener('click', performAppReset);
+
         // Re-build session queue when card editor closes (cards may have changed)
         document.getElementById('card-editor-modal').querySelector('.modal-close-button')
             .addEventListener('click', onCardEditorClose);
@@ -136,11 +143,13 @@ const Dialogs = (() => {
 
     function openDeckManager() {
         refreshDeckList();
+        updateProtectButtonLabel();
         openModal('deck-manager-modal');
     }
 
     function refreshDeckList() {
         const listbox = document.getElementById('deck-listbox');
+        const previouslySelected = listbox.value;
         listbox.innerHTML = '';
 
         const names = Config.getDeckNames();
@@ -158,11 +167,41 @@ const Dialogs = (() => {
             const deck = Config.loadDeck(name);
             const count = deck ? deck.cards.length : 0;
             const mode  = deck ? (deck.learningMode === 'spaced' ? ' [Spaced]' : ' [Simple]') : '';
+            const star  = deck && deck.isProtected ? '★ ' : '';
             const opt   = document.createElement('option');
             opt.value   = name;
-            opt.textContent = `${name}${mode} - ${count} card${count !== 1 ? 's' : ''}${name === currentName ? ' ✓' : ''}`;
+            opt.textContent = `${star}${name}${mode} - ${count} card${count !== 1 ? 's' : ''}${name === currentName ? ' ✓' : ''}`;
             listbox.appendChild(opt);
         });
+
+        // Restore prior selection where possible, so toggling protect/rename etc. doesn't lose focus
+        if (previouslySelected && names.includes(previouslySelected)) {
+            listbox.value = previouslySelected;
+        }
+    }
+
+    function updateProtectButtonLabel() {
+        const listbox = document.getElementById('deck-listbox');
+        const btn = document.getElementById('btn-deck-protect');
+        const selected = listbox.value;
+        const deck = selected ? Config.loadDeck(selected) : null;
+        btn.textContent = deck && deck.isProtected ? '☆ Unprotect Selected' : '★ Protect Selected';
+    }
+
+    function toggleSelectedDeckProtected() {
+        const listbox  = document.getElementById('deck-listbox');
+        const selected = listbox.value;
+        if (!selected) { UI.showMessage('Please select a deck to protect.', 'warning'); return; }
+
+        const nowProtected = Config.toggleProtected(selected);
+        if (nowProtected === null) { UI.showMessage('Deck not found.', 'error'); return; }
+
+        refreshDeckList();
+        updateProtectButtonLabel();
+        UI.showMessage(
+            nowProtected ? `Deck "${selected}" is now protected from deletion.` : `Deck "${selected}" is no longer protected.`,
+            'info', 3000
+        );
     }
 
     function openSelectedDeck() {
@@ -249,6 +288,12 @@ const Dialogs = (() => {
         const listbox  = document.getElementById('deck-listbox');
         const selected = listbox.value;
         if (!selected) { UI.showMessage('Please select a deck to delete.', 'warning'); return; }
+
+        const deck = Config.loadDeck(selected);
+        if (deck && deck.isProtected) {
+            UI.showMessage(`"${selected}" is protected. Unprotect it first (★ Protect Selected) before deleting.`, 'error');
+            return;
+        }
 
         if (!confirm(`Delete deck "${selected}"? This cannot be undone.`)) return;
 
@@ -739,6 +784,58 @@ const Dialogs = (() => {
         renderCardList(deck.cards, '');
         UI.updateState();
         UI.showMessage(`All cards in "${deck.name}" reset to "To Review".`, 'success');
+    }
+
+    // ========================
+    // Reset App (full wipe, guarded)
+    // ========================
+
+    /**
+     * Open the reset-app confirmation modal. Shown from a discreet
+     * "Danger Zone" link in Settings. Requires the user to type RESET
+     * before the erase button becomes clickable, plus a final native
+     * confirm() as a second gate against stray clicks.
+     */
+    function openResetAppModal() {
+        const names = Config.getDeckNames();
+        const protectedCount = names.reduce((n, name) => {
+            const d = Config.loadDeck(name);
+            return n + (d && d.isProtected ? 1 : 0);
+        }, 0);
+
+        let msg = `${names.length} deck${names.length !== 1 ? 's' : ''} and all settings will be permanently deleted.`;
+        if (protectedCount > 0) {
+            msg += ` This includes ${protectedCount} protected deck${protectedCount !== 1 ? 's' : ''} - protection does not survive a full reset.`;
+        }
+        document.getElementById('reset-app-stats').textContent = msg;
+
+        document.getElementById('reset-confirm-input').value = '';
+        document.getElementById('btn-reset-app-confirm').disabled = true;
+
+        closeModal('settings-modal');
+        openModal('reset-app-modal');
+        setTimeout(() => document.getElementById('reset-confirm-input').focus(), 50);
+    }
+
+    function updateResetConfirmButton() {
+        const input = document.getElementById('reset-confirm-input');
+        document.getElementById('btn-reset-app-confirm').disabled = input.value.trim() !== 'RESET';
+    }
+
+    function performAppReset() {
+        const input = document.getElementById('reset-confirm-input');
+        if (input.value.trim() !== 'RESET') return; // guard even if the disabled check was bypassed
+
+        if (!confirm('Last chance: this erases every deck and setting in this browser, right now. Continue?')) return;
+
+        try {
+            localStorage.clear();
+        } catch (e) {
+            UI.showMessage('Failed to reset app: ' + e.message, 'error');
+            return;
+        }
+
+        window.location.reload();
     }
 
     // ========================

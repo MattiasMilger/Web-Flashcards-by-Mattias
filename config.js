@@ -136,12 +136,25 @@ const Config = (() => {
             dailyLimit: DEFAULT_DAILY_LIMIT,
             learningMode: DEFAULT_LEARNING_MODE,
             accumulateDailyLimit: false,
+            isProtected: false,
             cards: [],
             lastSessionDate: null,
             cardsReviewedToday: 0,
             sessionExtension: 0,
             accumulatedExtra: 0
         };
+    }
+
+    /**
+     * Toggle the protected flag on a deck (protects it from deletion).
+     * Returns the new protected state, or null if the deck doesn't exist.
+     */
+    function toggleProtected(name) {
+        const deck = loadDeck(name);
+        if (!deck) return null;
+        deck.isProtected = !deck.isProtected;
+        saveDeck(deck);
+        return deck.isProtected;
     }
 
     function createExampleDeck() {
@@ -217,6 +230,7 @@ const Config = (() => {
         data.dailyLimit = data.dailyLimit || data.daily_limit || DEFAULT_DAILY_LIMIT;
         data.learningMode = data.learningMode || data.learning_mode || DEFAULT_LEARNING_MODE;
         data.accumulateDailyLimit = data.accumulateDailyLimit || false;
+        data.isProtected = data.isProtected || data.is_protected || false;
         data.lastSessionDate = data.lastSessionDate || data.last_session_date || null;
         data.cardsReviewedToday = data.cardsReviewedToday || data.cards_reviewed_today || 0;
         data.sessionExtension = data.sessionExtension || data.session_extension || 0;
@@ -237,6 +251,7 @@ const Config = (() => {
         deleteDeck,
         renameDeck,
         createEmptyDeck,
+        toggleProtected,
         exportDeckTxt,
         exportDeck,
         importDeck

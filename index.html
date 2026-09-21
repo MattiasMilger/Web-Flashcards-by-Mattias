@@ -122,6 +122,7 @@
                 <button id="btn-deck-open" class="modal-action-button accent-button">Open Selected</button>
                 <button id="btn-deck-new" class="modal-action-button">New Deck</button>
                 <button id="btn-deck-rename" class="modal-action-button">Rename Selected</button>
+                <button id="btn-deck-protect" class="modal-action-button">★ Protect Selected</button>
                 <button id="btn-deck-delete" class="modal-action-button danger-button">Delete Selected</button>
             </div>
             <div class="modal-button-row">
@@ -265,6 +266,28 @@
                 <button id="btn-settings-save" class="modal-action-button accent-button">Save</button>
                 <button class="modal-action-button" data-modal="settings-modal">Cancel</button>
             </div>
+            <div class="form-group">
+                <label class="reset-label">Danger Zone</label>
+                <button id="btn-reset-app-open" class="control-button danger-button">Erase all data and start over…</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reset App Modal -->
+    <div id="reset-app-modal" class="modal hidden">
+        <div class="modal-content modal-small modal-danger">
+            <span class="close-button" data-modal="reset-app-modal">&times;</span>
+            <h2>Reset App?</h2>
+            <p class="modal-subtitle">This permanently deletes every deck and setting stored in this browser. This cannot be undone.</p>
+            <div id="reset-app-stats" class="info-section"></div>
+            <div class="form-group">
+                <label for="reset-confirm-input">Type <strong>RESET</strong> to confirm:</label>
+                <input type="text" id="reset-confirm-input" autocomplete="off" placeholder="RESET">
+            </div>
+            <div class="modal-button-row">
+                <button id="btn-reset-app-confirm" class="modal-action-button danger-button" disabled>Erase Everything</button>
+                <button class="modal-action-button" data-modal="reset-app-modal">Cancel</button>
+            </div>
         </div>
     </div>
 
@@ -286,6 +309,7 @@
                     <ul class="info-list">
                         <li><strong>Create decks</strong> - give each deck a name and start adding cards.</li>
                         <li><strong>Rename deck</strong> - select a deck in Manage Decks and click Rename Selected to give it a new name.</li>
+                        <li><strong>Protect deck</strong> - select a deck and click ★ Protect Selected to guard it against accidental deletion. Protected decks are marked with ★ in the list and must be unprotected before they can be deleted.</li>
                         <li><strong>Import/Export</strong> - save decks as <code>.json</code> or <code>.txt</code> files and reload them later.</li>
                         <li><strong>Import from text</strong> - paste or load cards in "Word - Translation" or tab-separated (Anki export) format, one per line.</li>
                     </ul>
@@ -350,6 +374,10 @@
                 <h3>Technical Notes</h3>
                 <div class="info-section">
                     <p>All data is stored in your browser's <code>localStorage</code>. Nothing is sent to a server. Clearing browser data will erase your decks - export them first as a backup.</p>
+                </div>
+                <div class="info-section">
+                    <strong>Reset App</strong>
+                    <p>Found under Settings → Danger Zone. Permanently erases every deck and setting in this browser, including protected decks, and returns the app to its first-launch state. Requires typing <code>RESET</code> and confirming a second time, since it cannot be undone.</p>
                 </div>
             </div>
             <button class="modal-close-button" data-modal="info-modal">Close</button>
