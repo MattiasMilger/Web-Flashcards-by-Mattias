@@ -51,11 +51,9 @@ const Dialogs = (() => {
 
     function initEventListeners() {
         // Deck manager
-        document.getElementById('deck-listbox').addEventListener('change', updateProtectButtonLabel);
         document.getElementById('btn-deck-open').addEventListener('click', openSelectedDeck);
         document.getElementById('btn-deck-new').addEventListener('click', openNewDeckModal);
         document.getElementById('btn-deck-rename').addEventListener('click', openRenameDeckModal);
-        document.getElementById('btn-deck-protect').addEventListener('click', toggleSelectedDeckProtected);
         document.getElementById('btn-deck-delete').addEventListener('click', deleteSelectedDeck);
         document.getElementById('btn-deck-export').addEventListener('click', exportSelectedDeck);
         document.getElementById('btn-deck-export-txt').addEventListener('click', exportSelectedDeckTxt);
@@ -116,11 +114,6 @@ const Dialogs = (() => {
         document.getElementById('btn-extend-confirm').addEventListener('click', extendSessionFromSettings);
         document.getElementById('btn-reset-cards').addEventListener('click', resetDeckCards);
 
-        // Reset App (discreet, guarded action)
-        document.getElementById('btn-reset-app-open').addEventListener('click', openResetAppModal);
-        document.getElementById('reset-confirm-input').addEventListener('input', updateResetConfirmButton);
-        document.getElementById('btn-reset-app-confirm').addEventListener('click', performAppReset);
-
         // Re-build session queue when card editor closes (cards may have changed)
         document.getElementById('card-editor-modal').querySelector('.modal-close-button')
             .addEventListener('click', onCardEditorClose);
@@ -143,13 +136,11 @@ const Dialogs = (() => {
 
     function openDeckManager() {
         refreshDeckList();
-        updateProtectButtonLabel();
         openModal('deck-manager-modal');
     }
 
     function refreshDeckList() {
         const listbox = document.getElementById('deck-listbox');
-        const previouslySelected = listbox.value;
         listbox.innerHTML = '';
 
         const names = Config.getDeckNames();
@@ -166,42 +157,11 @@ const Dialogs = (() => {
         names.forEach(name => {
             const deck = Config.loadDeck(name);
             const count = deck ? deck.cards.length : 0;
-            const mode  = deck ? (deck.learningMode === 'spaced' ? ' [Spaced]' : ' [Simple]') : '';
-            const star  = deck && deck.isProtected ? '★ ' : '';
             const opt   = document.createElement('option');
             opt.value   = name;
-            opt.textContent = `${star}${name}${mode} - ${count} card${count !== 1 ? 's' : ''}${name === currentName ? ' ✓' : ''}`;
+            opt.textContent = `${name} - ${count} card${count !== 1 ? 's' : ''}${name === currentName ? ' ✓' : ''}`;
             listbox.appendChild(opt);
         });
-
-        // Restore prior selection where possible, so toggling protect/rename etc. doesn't lose focus
-        if (previouslySelected && names.includes(previouslySelected)) {
-            listbox.value = previouslySelected;
-        }
-    }
-
-    function updateProtectButtonLabel() {
-        const listbox = document.getElementById('deck-listbox');
-        const btn = document.getElementById('btn-deck-protect');
-        const selected = listbox.value;
-        const deck = selected ? Config.loadDeck(selected) : null;
-        btn.textContent = deck && deck.isProtected ? '☆ Unprotect Selected' : '★ Protect Selected';
-    }
-
-    function toggleSelectedDeckProtected() {
-        const listbox  = document.getElementById('deck-listbox');
-        const selected = listbox.value;
-        if (!selected) { UI.showMessage('Please select a deck to protect.', 'warning'); return; }
-
-        const nowProtected = Config.toggleProtected(selected);
-        if (nowProtected === null) { UI.showMessage('Deck not found.', 'error'); return; }
-
-        refreshDeckList();
-        updateProtectButtonLabel();
-        UI.showMessage(
-            nowProtected ? `Deck "${selected}" is now protected from deletion.` : `Deck "${selected}" is no longer protected.`,
-            'info', 3000
-        );
     }
 
     function openSelectedDeck() {
@@ -289,12 +249,6 @@ const Dialogs = (() => {
         const selected = listbox.value;
         if (!selected) { UI.showMessage('Please select a deck to delete.', 'warning'); return; }
 
-        const deck = Config.loadDeck(selected);
-        if (deck && deck.isProtected) {
-            UI.showMessage(`"${selected}" is protected. Unprotect it first (★ Protect Selected) before deleting.`, 'error');
-            return;
-        }
-
         if (!confirm(`Delete deck "${selected}"? This cannot be undone.`)) return;
 
         Config.deleteDeck(selected);
@@ -346,7 +300,7 @@ const Dialogs = (() => {
         reader.onload = e => {
             try {
                 const data   = JSON.parse(e.target.result);
-                const result = Config.importDeck(data);
+                const result = Config.importDeck(data); // normalizes old/Simple-mode decks
 
                 if (typeof result === 'string') {
                     UI.showMessage(result, 'error');
@@ -387,11 +341,7 @@ const Dialogs = (() => {
                 if (line.startsWith('#')) return; // Anki export comment/header lines
                 const parsed = parseTxtLine(line);
                 if (parsed) {
-                    cards.push({
-                        word: parsed.word, translation: parsed.translation,
-                        sessionStatus: 'TO_REVIEW',
-                        dueDate: null, interval: 1, easeFactor: 2.5
-                    });
+                    cards.push(newCard(parsed.word, parsed.translation));
                 } else { skipped.push(line); }
             });
 
@@ -444,16 +394,10 @@ const Dialogs = (() => {
               })
             : cards.slice();
 
-        // Sort: TO_REVIEW first, then SPACED by due date, then FINISHED last
-        const statusOrder = s => s === 'FINISHED' ? 2 : s === 'SPACED' ? 1 : 0;
+        // Sort: new cards first, then by due date ascending
         list.sort((a, b) => {
-            const diff = statusOrder(a.sessionStatus) - statusOrder(b.sessionStatus);
-            if (diff !== 0) return diff;
-            // Within SPACED, sort by due date ascending
-            if (a.sessionStatus === 'SPACED' && b.sessionStatus === 'SPACED') {
-                return (a.dueDate || '') < (b.dueDate || '') ? -1 : 1;
-            }
-            return 0;
+            if (!a.dueDate || !b.dueDate) return (a.dueDate ? 1 : 0) - (b.dueDate ? 1 : 0);
+            return a.dueDate < b.dueDate ? -1 : a.dueDate > b.dueDate ? 1 : 0;
         });
 
         if (list.length === 0) {
@@ -478,13 +422,7 @@ const Dialogs = (() => {
             // Status badge
             const badge = document.createElement('span');
             badge.className = 'card-status-badge';
-            if (card.sessionStatus === 'FINISHED') {
-                badge.textContent = 'Finished';
-            } else if (card.dueDate) {
-                badge.textContent = `Due: ${card.dueDate}`;
-            } else {
-                badge.textContent = 'To Review';
-            }
+            badge.textContent = card.dueDate ? `Due: ${card.dueDate}` : 'To Review';
 
             // Action buttons
             const actions = document.createElement('div');
@@ -508,6 +446,17 @@ const Dialogs = (() => {
             row.appendChild(actions);
             container.appendChild(row);
         });
+    }
+
+    function newCard(word, translation) {
+        return {
+            word,
+            translation,
+            sessionStatus: 'TO_REVIEW',
+            dueDate:       null,
+            interval:      1,
+            easeFactor:    2.5
+        };
     }
 
     function openAddCard() {
@@ -549,14 +498,7 @@ const Dialogs = (() => {
             deck.cards[editingCardIndex].translation = translation;
             UI.showMessage('Card updated.', 'success', 2000);
         } else {
-            deck.cards.push({
-                word,
-                translation,
-                sessionStatus: 'TO_REVIEW',
-                dueDate:       null,
-                interval:      1,
-                easeFactor:    2.5
-            });
+            deck.cards.push(newCard(word, translation));
             UI.showMessage('Card added.', 'success', 2000);
         }
 
@@ -634,14 +576,7 @@ const Dialogs = (() => {
                 if (isDuplicate) {
                     skipped++;
                 } else {
-                    deck.cards.push({
-                        word:          importedCard.word,
-                        translation:   importedCard.translation,
-                        sessionStatus: 'TO_REVIEW',
-                        dueDate:       null,
-                        interval:      1,
-                        easeFactor:    2.5
-                    });
+                    deck.cards.push(newCard(importedCard.word, importedCard.translation));
                     added++;
                 }
             });
@@ -672,14 +607,7 @@ const Dialogs = (() => {
             if (line.startsWith('#')) return; // Anki export comment/header lines
             const parsed = parseTxtLine(line);
             if (parsed) {
-                deck.cards.push({
-                    word:          parsed.word,
-                    translation:   parsed.translation,
-                    sessionStatus: 'TO_REVIEW',
-                    dueDate:       null,
-                    interval:      1,
-                    easeFactor:    2.5
-                });
+                deck.cards.push(newCard(parsed.word, parsed.translation));
                 added++;
             } else {
                 skipped++;
@@ -701,13 +629,9 @@ const Dialogs = (() => {
 
     function openSettings() {
         const deck = UI.getCurrentDeck();
-        const mode       = deck ? deck.learningMode        : Config.DEFAULT_LEARNING_MODE;
-        const limit      = deck ? deck.dailyLimit          : Config.DEFAULT_DAILY_LIMIT;
+        const limit      = deck ? deck.dailyLimit : Config.DEFAULT_DAILY_LIMIT;
         const accumulate = deck ? !!deck.accumulateDailyLimit : false;
 
-        document.querySelectorAll('input[name="learning-mode"]').forEach(r => {
-            r.checked = r.value === mode;
-        });
         document.getElementById('daily-limit-input').value = limit;
 
         document.querySelectorAll('input[name="accumulate-limit"]').forEach(r => {
@@ -726,8 +650,6 @@ const Dialogs = (() => {
     }
 
     function saveSettings() {
-        const modeInput  = document.querySelector('input[name="learning-mode"]:checked');
-        const mode       = modeInput ? modeInput.value : Config.DEFAULT_LEARNING_MODE;
         const limitInput = parseInt(document.getElementById('daily-limit-input').value, 10);
         const limit      = isNaN(limitInput) ? Config.DEFAULT_DAILY_LIMIT : Math.max(1, Math.min(500, limitInput));
         const accumInput = document.querySelector('input[name="accumulate-limit"]:checked');
@@ -735,8 +657,7 @@ const Dialogs = (() => {
 
         const deck = UI.getCurrentDeck();
         if (deck) {
-            deck.learningMode        = mode;
-            deck.dailyLimit          = limit;
+            deck.dailyLimit           = limit;
             deck.accumulateDailyLimit = accumulate;
             // If accumulation is turned off, clear any stored extra
             if (!accumulate) deck.accumulatedExtra = 0;
@@ -784,58 +705,6 @@ const Dialogs = (() => {
         renderCardList(deck.cards, '');
         UI.updateState();
         UI.showMessage(`All cards in "${deck.name}" reset to "To Review".`, 'success');
-    }
-
-    // ========================
-    // Reset App (full wipe, guarded)
-    // ========================
-
-    /**
-     * Open the reset-app confirmation modal. Shown from a discreet
-     * "Danger Zone" link in Settings. Requires the user to type RESET
-     * before the erase button becomes clickable, plus a final native
-     * confirm() as a second gate against stray clicks.
-     */
-    function openResetAppModal() {
-        const names = Config.getDeckNames();
-        const protectedCount = names.reduce((n, name) => {
-            const d = Config.loadDeck(name);
-            return n + (d && d.isProtected ? 1 : 0);
-        }, 0);
-
-        let msg = `${names.length} deck${names.length !== 1 ? 's' : ''} and all settings will be permanently deleted.`;
-        if (protectedCount > 0) {
-            msg += ` This includes ${protectedCount} protected deck${protectedCount !== 1 ? 's' : ''} - protection does not survive a full reset.`;
-        }
-        document.getElementById('reset-app-stats').textContent = msg;
-
-        document.getElementById('reset-confirm-input').value = '';
-        document.getElementById('btn-reset-app-confirm').disabled = true;
-
-        closeModal('settings-modal');
-        openModal('reset-app-modal');
-        setTimeout(() => document.getElementById('reset-confirm-input').focus(), 50);
-    }
-
-    function updateResetConfirmButton() {
-        const input = document.getElementById('reset-confirm-input');
-        document.getElementById('btn-reset-app-confirm').disabled = input.value.trim() !== 'RESET';
-    }
-
-    function performAppReset() {
-        const input = document.getElementById('reset-confirm-input');
-        if (input.value.trim() !== 'RESET') return; // guard even if the disabled check was bypassed
-
-        if (!confirm('Last chance: this erases every deck and setting in this browser, right now. Continue?')) return;
-
-        try {
-            localStorage.clear();
-        } catch (e) {
-            UI.showMessage('Failed to reset app: ' + e.message, 'error');
-            return;
-        }
-
-        window.location.reload();
     }
 
     // ========================

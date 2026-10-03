@@ -96,7 +96,6 @@ const UI = (() => {
         const cardText         = document.getElementById('card-text');
         const cardProgress     = document.getElementById('card-progress');
         const showAnswerArea   = document.getElementById('show-answer-area');
-        const ratingSimple     = document.getElementById('rating-simple');
         const ratingSpaced     = document.getElementById('rating-spaced');
         const btnBackToFront   = document.getElementById('btn-back-to-front');
         const btnRewind        = document.getElementById('btn-rewind');
@@ -113,20 +112,12 @@ const UI = (() => {
         // Show Answer vs rating buttons
         if (!showBack) {
             showAnswerArea.classList.remove('hidden');
-            ratingSimple.classList.add('hidden');
             ratingSpaced.classList.add('hidden');
             btnBackToFront.classList.add('hidden');
         } else {
             showAnswerArea.classList.add('hidden');
             btnBackToFront.classList.remove('hidden');
-
-            if (currentDeck.learningMode === 'spaced') {
-                ratingSpaced.classList.remove('hidden');
-                ratingSimple.classList.add('hidden');
-            } else {
-                ratingSimple.classList.remove('hidden');
-                ratingSpaced.classList.add('hidden');
-            }
+            ratingSpaced.classList.remove('hidden');
         }
 
         // Rewind button
@@ -141,17 +132,10 @@ const UI = (() => {
         if (!currentDeck) return;
 
         document.getElementById('deck-name-label').textContent = currentDeck.name;
-        document.getElementById('deck-mode-label').textContent =
-            currentDeck.learningMode === 'spaced' ? 'Spaced Repetition' : 'Simple';
 
         const stats = Session.getDeckStats(currentDeck);
-        const prog  = document.getElementById('deck-progress-label');
-
-        if (stats.mode === 'spaced') {
-            prog.textContent = `${stats.due} due • ${stats.upcoming} upcoming • ${stats.total} total`;
-        } else {
-            prog.textContent = `${stats.toReview} to review • ${stats.finished} finished • ${stats.total} total`;
-        }
+        document.getElementById('deck-progress-label').textContent =
+            `${stats.due} due • ${stats.upcoming} upcoming • ${stats.total} total`;
     }
 
     function renderComplete() {
@@ -168,26 +152,10 @@ const UI = (() => {
             }
         }
 
-        if (stats.mode === 'simple') {
-            if (stats.toReview === 0) {
-                title.textContent    = 'All Done!';
-                subtitle.textContent = `You have finished all ${stats.total} cards in this deck.`;
-            } else {
-                title.textContent    = 'Session Complete!';
-                subtitle.textContent =
-                    `Daily limit reached. ${stats.toReview} card(s) still to review.`;
-            }
-        } else {
-            if (stats.due === 0) {
-                title.textContent    = 'Session Complete!';
-                subtitle.textContent =
-                    `No more cards due today. ${stats.upcoming} card(s) coming up later.`;
-            } else {
-                title.textContent    = 'Session Complete!';
-                subtitle.textContent =
-                    `Daily limit reached.`;
-            }
-        }
+        title.textContent = 'Session Complete!';
+        subtitle.textContent = stats.due === 0
+            ? `No more cards due today. ${stats.upcoming} card(s) coming up later.`
+            : 'Daily limit reached.';
     }
 
     // ========================
@@ -268,15 +236,10 @@ const UI = (() => {
                 onShowAnswer();
             }
         } else if (appState === 'SHOW_BACK') {
-            if (currentDeck.learningMode === 'simple') {
-                if (e.key === '1') onRate('forgot');
-                if (e.key === '2') onRate('remembered');
-            } else {
-                if (e.key === '1') onRate('again');
-                if (e.key === '2') onRate('hard');
-                if (e.key === '3') onRate('good');
-                if (e.key === '4') onRate('easy');
-            }
+            if (e.key === '1') onRate('again');
+            if (e.key === '2') onRate('hard');
+            if (e.key === '3') onRate('good');
+            if (e.key === '4') onRate('easy');
         }
     }
 
@@ -327,12 +290,10 @@ const UI = (() => {
         document.getElementById('btn-extend-session-main').addEventListener('click', onExtendSession);
 
         // Rating buttons
-        document.getElementById('btn-forgot').addEventListener('click',     () => onRate('forgot'));
-        document.getElementById('btn-remembered').addEventListener('click', () => onRate('remembered'));
-        document.getElementById('btn-again').addEventListener('click',      () => onRate('again'));
-        document.getElementById('btn-hard').addEventListener('click',       () => onRate('hard'));
-        document.getElementById('btn-good').addEventListener('click',       () => onRate('good'));
-        document.getElementById('btn-easy').addEventListener('click',       () => onRate('easy'));
+        document.getElementById('btn-again').addEventListener('click', () => onRate('again'));
+        document.getElementById('btn-hard').addEventListener('click',  () => onRate('hard'));
+        document.getElementById('btn-good').addEventListener('click',  () => onRate('good'));
+        document.getElementById('btn-easy').addEventListener('click',  () => onRate('easy'));
 
         // Card click - copy text to clipboard
         document.getElementById('card-display').addEventListener('click', () => {

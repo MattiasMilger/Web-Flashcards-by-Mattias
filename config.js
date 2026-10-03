@@ -8,13 +8,87 @@ const Config = (() => {
     const DECK_PREFIX = 'flashcards_deck_';
 
     const DEFAULT_DAILY_LIMIT = 5;
-    const DEFAULT_LEARNING_MODE = 'spaced';
+    const SCHEMA_VERSION = 2; // 2 = spaced repetition only
 
     let config = {
         currentDeckName: null,
         theme: 'dark',
         deckNames: []
     };
+
+    // ========================
+    // Date / migration helpers
+    // ========================
+
+    function todayStr() {
+        return new Date().toISOString().split('T')[0];
+    }
+
+    function addDays(dateStr, days) {
+        const d = new Date(dateStr + 'T12:00:00');
+        d.setDate(d.getDate() + days);
+        return d.toISOString().split('T')[0];
+    }
+
+    function isValidDate(s) {
+        return typeof s === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(s) && !isNaN(new Date(s + 'T12:00:00'));
+    }
+
+    function toCount(v) {
+        const n = parseInt(v, 10);
+        return n >= 0 ? n : 0;
+    }
+
+    /**
+     * Bring any deck (old Simple-mode save, Python-app export, partial data)
+     * up to the current schema. Mutates and returns the deck.
+     */
+    function normalizeDeck(deck) {
+        const today = todayStr();
+        let finishedCount = 0;
+
+        deck.cards = (Array.isArray(deck.cards) ? deck.cards : []).map(c => {
+            let dueDate = c.dueDate || c.due_date || null;
+            if (!isValidDate(dueDate)) dueDate = null;
+
+            let interval = Math.round(Number(c.interval));
+            if (!(interval >= 1)) interval = 1;
+
+            let ease = Number(c.easeFactor != null ? c.easeFactor : c.ease_factor);
+            if (!(ease >= 1.3)) ease = 2.5;
+
+            // Simple-mode "Finished" cards: schedule them instead of resurfacing as new
+            const status = c.sessionStatus || c.session_status;
+            if (status === 'FINISHED' && !dueDate) {
+                interval = Math.max(interval, 7);
+                dueDate = addDays(today, 7 + (finishedCount++ % 14));
+            }
+
+            return {
+                word: String(c.word != null ? c.word : ''),
+                translation: String(c.translation != null ? c.translation : ''),
+                sessionStatus: dueDate ? 'SPACED' : 'TO_REVIEW',
+                dueDate,
+                interval,
+                easeFactor: Math.round(ease * 1000) / 1000
+            };
+        }).filter(c => c.word || c.translation);
+
+        const limit = parseInt(deck.dailyLimit != null ? deck.dailyLimit : deck.daily_limit, 10);
+        deck.dailyLimit = limit >= 1 ? Math.min(500, limit) : DEFAULT_DAILY_LIMIT;
+        deck.learningMode = 'spaced'; // pinned; Simple mode no longer exists
+        deck.accumulateDailyLimit = !!deck.accumulateDailyLimit;
+        const last = deck.lastSessionDate || deck.last_session_date;
+        deck.lastSessionDate = isValidDate(last) ? last : null;
+        deck.cardsReviewedToday = toCount(deck.cardsReviewedToday != null ? deck.cardsReviewedToday : deck.cards_reviewed_today);
+        deck.sessionExtension = toCount(deck.sessionExtension != null ? deck.sessionExtension : deck.session_extension);
+        deck.accumulatedExtra = toCount(deck.accumulatedExtra);
+        deck.schemaVersion = SCHEMA_VERSION;
+
+        ['daily_limit', 'learning_mode', 'last_session_date', 'cards_reviewed_today', 'session_extension']
+            .forEach(k => delete deck[k]);
+        return deck;
+    }
 
     // ========================
     // Config load/save
@@ -40,6 +114,9 @@ const Config = (() => {
             config.currentDeckName = example.name;
             save();
         }
+
+        // Migrate any older saves once, up front
+        config.deckNames.forEach(n => loadDeck(n));
     }
 
     function save() {
@@ -70,7 +147,14 @@ const Config = (() => {
         const raw = localStorage.getItem(deckKey(name));
         if (!raw) return null;
         try {
-            return JSON.parse(raw);
+            const deck = JSON.parse(raw);
+            if (!deck || typeof deck !== 'object') return null;
+            if (deck.schemaVersion !== SCHEMA_VERSION) {
+                if (!deck.name) deck.name = name;
+                normalizeDeck(deck);
+                try { localStorage.setItem(deckKey(name), JSON.stringify(deck)); } catch (e) { /* ignore */ }
+            }
+            return deck;
         } catch (e) {
             console.warn('Config: Failed to parse deck:', name);
             return null;
@@ -134,9 +218,9 @@ const Config = (() => {
         return {
             name,
             dailyLimit: DEFAULT_DAILY_LIMIT,
-            learningMode: DEFAULT_LEARNING_MODE,
+            learningMode: 'spaced',
+            schemaVersion: SCHEMA_VERSION,
             accumulateDailyLimit: false,
-            isProtected: false,
             cards: [],
             lastSessionDate: null,
             cardsReviewedToday: 0,
@@ -145,35 +229,18 @@ const Config = (() => {
         };
     }
 
-    /**
-     * Toggle the protected flag on a deck (protects it from deletion).
-     * Returns the new protected state, or null if the deck doesn't exist.
-     */
-    function toggleProtected(name) {
-        const deck = loadDeck(name);
-        if (!deck) return null;
-        deck.isProtected = !deck.isProtected;
-        saveDeck(deck);
-        return deck.isProtected;
-    }
-
     function createExampleDeck() {
         const deck = createEmptyDeck('Spanish Basics (Example)');
         deck.dailyLimit = 5;
-        deck.cards = [
-            { word: 'Hola',            translation: 'Hello',        sessionStatus: 'TO_REVIEW', dueDate: null, interval: 1, easeFactor: 2.5 },
-            { word: 'Adiós',           translation: 'Goodbye',      sessionStatus: 'TO_REVIEW', dueDate: null, interval: 1, easeFactor: 2.5 },
-            { word: 'Gracias',         translation: 'Thank you',    sessionStatus: 'TO_REVIEW', dueDate: null, interval: 1, easeFactor: 2.5 },
-            { word: 'Por favor',       translation: 'Please',       sessionStatus: 'TO_REVIEW', dueDate: null, interval: 1, easeFactor: 2.5 },
-            { word: 'Sí',              translation: 'Yes',          sessionStatus: 'TO_REVIEW', dueDate: null, interval: 1, easeFactor: 2.5 },
-            { word: 'Lo siento',       translation: 'I am sorry',   sessionStatus: 'TO_REVIEW', dueDate: null, interval: 1, easeFactor: 2.5 },
-            { word: 'Gato',            translation: 'Cat',          sessionStatus: 'TO_REVIEW', dueDate: null, interval: 1, easeFactor: 2.5 },
-            { word: 'Perro',           translation: 'Dog',          sessionStatus: 'TO_REVIEW', dueDate: null, interval: 1, easeFactor: 2.5 },
-            { word: 'Agua',            translation: 'Water',        sessionStatus: 'TO_REVIEW', dueDate: null, interval: 1, easeFactor: 2.5 },
-            { word: 'Pan',             translation: 'Bread',        sessionStatus: 'TO_REVIEW', dueDate: null, interval: 1, easeFactor: 2.5 },
-            { word: 'Casa',            translation: 'House',        sessionStatus: 'TO_REVIEW', dueDate: null, interval: 1, easeFactor: 2.5 },
-            { word: 'Libro',           translation: 'Book',         sessionStatus: 'TO_REVIEW', dueDate: null, interval: 1, easeFactor: 2.5 }
+        const pairs = [
+            ['Hola', 'Hello'], ['Adiós', 'Goodbye'], ['Gracias', 'Thank you'],
+            ['Por favor', 'Please'], ['Sí', 'Yes'], ['Lo siento', 'I am sorry'],
+            ['Gato', 'Cat'], ['Perro', 'Dog'], ['Agua', 'Water'],
+            ['Pan', 'Bread'], ['Casa', 'House'], ['Libro', 'Book']
         ];
+        deck.cards = pairs.map(([word, translation]) => ({
+            word, translation, sessionStatus: 'TO_REVIEW', dueDate: null, interval: 1, easeFactor: 2.5
+        }));
         return deck;
     }
 
@@ -181,30 +248,26 @@ const Config = (() => {
     // Export / Import
     // ========================
 
-    function exportDeckTxt(deck) {
-        const lines = deck.cards.map(c => `${c.word} - ${c.translation}`).join('\n');
-        const blob  = new Blob([lines], { type: 'text/plain' });
-        const url   = URL.createObjectURL(blob);
-        const a     = document.createElement('a');
-        a.href      = url;
-        a.download  = deck.name.replace(/[^a-z0-9_\-]/gi, '_') + '.txt';
+    function downloadBlob(content, type, filename) {
+        const blob = new Blob([content], { type });
+        const url  = URL.createObjectURL(blob);
+        const a    = document.createElement('a');
+        a.href     = url;
+        a.download = filename;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
     }
 
+    function exportDeckTxt(deck) {
+        const lines = deck.cards.map(c => `${c.word} - ${c.translation}`).join('\n');
+        downloadBlob(lines, 'text/plain', deck.name.replace(/[^a-z0-9_\-]/gi, '_') + '.txt');
+    }
+
     function exportDeck(deck) {
-        const data = JSON.stringify(deck, null, 2);
-        const blob = new Blob([data], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = deck.name.replace(/[^a-z0-9_\-]/gi, '_') + '.json';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+        downloadBlob(JSON.stringify(deck, null, 2), 'application/json',
+            deck.name.replace(/[^a-z0-9_\-]/gi, '_') + '.json');
     }
 
     /**
@@ -215,33 +278,11 @@ const Config = (() => {
         if (!data || typeof data !== 'object') return 'Invalid deck format.';
         if (!data.name || typeof data.name !== 'string') return 'Deck is missing a name.';
         if (!Array.isArray(data.cards)) return 'Deck is missing a cards array.';
-
-        // Normalize cards (support both camelCase and snake_case keys from Python export)
-        data.cards = data.cards.map(card => ({
-            word: card.word || '',
-            translation: card.translation || '',
-            sessionStatus: card.sessionStatus || card.session_status || 'TO_REVIEW',
-            dueDate: card.dueDate || card.due_date || null,
-            interval: card.interval != null ? card.interval : 1,
-            easeFactor: card.easeFactor || card.ease_factor || 2.5
-        })).filter(c => c.word || c.translation);
-
-        // Normalize deck-level fields
-        data.dailyLimit = data.dailyLimit || data.daily_limit || DEFAULT_DAILY_LIMIT;
-        data.learningMode = data.learningMode || data.learning_mode || DEFAULT_LEARNING_MODE;
-        data.accumulateDailyLimit = data.accumulateDailyLimit || false;
-        data.isProtected = data.isProtected || data.is_protected || false;
-        data.lastSessionDate = data.lastSessionDate || data.last_session_date || null;
-        data.cardsReviewedToday = data.cardsReviewedToday || data.cards_reviewed_today || 0;
-        data.sessionExtension = data.sessionExtension || data.session_extension || 0;
-        data.accumulatedExtra = data.accumulatedExtra || 0;
-
-        return data;
+        return normalizeDeck(data);
     }
 
     return {
         DEFAULT_DAILY_LIMIT,
-        DEFAULT_LEARNING_MODE,
         load,
         save,
         getConfig,
@@ -251,7 +292,6 @@ const Config = (() => {
         deleteDeck,
         renameDeck,
         createEmptyDeck,
-        toggleProtected,
         exportDeckTxt,
         exportDeck,
         importDeck

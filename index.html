@@ -30,7 +30,6 @@
         <div id="deck-status-bar" class="deck-status-bar hidden">
             <span id="deck-name-label" class="deck-name"></span>
             <span id="deck-progress-label" class="deck-progress"></span>
-            <span id="deck-mode-label" class="deck-mode"></span>
         </div>
 
         <!-- NO_DECK state -->
@@ -53,19 +52,7 @@
                 <button id="btn-show-answer" class="main-button">Show Answer</button>
             </div>
 
-            <!-- Simple mode rating buttons (SHOW_BACK) -->
-            <div id="rating-simple" class="rating-buttons hidden">
-                <button id="btn-forgot" class="rating-button fail-button">
-                    Forgot
-                    <span class="button-sub">To Review Again</span>
-                </button>
-                <button id="btn-remembered" class="rating-button success-button">
-                    Remembered
-                    <span class="button-sub">Finished</span>
-                </button>
-            </div>
-
-            <!-- Spaced mode rating buttons (SHOW_BACK) -->
+            <!-- Rating buttons (SHOW_BACK) -->
             <div id="rating-spaced" class="rating-buttons hidden">
                 <button id="btn-again" class="rating-button fail-button">
                     Again
@@ -122,14 +109,13 @@
                 <button id="btn-deck-open" class="modal-action-button accent-button">Open Selected</button>
                 <button id="btn-deck-new" class="modal-action-button">New Deck</button>
                 <button id="btn-deck-rename" class="modal-action-button">Rename Selected</button>
-                <button id="btn-deck-protect" class="modal-action-button">★ Protect Selected</button>
                 <button id="btn-deck-delete" class="modal-action-button danger-button">Delete Selected</button>
             </div>
             <div class="modal-button-row">
                 <button id="btn-deck-export" class="modal-action-button">Export Deck (.json)</button>
                 <button id="btn-deck-export-txt" class="modal-action-button">Export Deck (.txt)</button>
                 <button id="btn-deck-import-trigger" class="modal-action-button">Import Deck (.json)</button>
-                <button id="btn-deck-import-txt-trigger" class="modal-action-button">Import from .txt</button>
+                <button id="btn-deck-import-txt-trigger" class="modal-action-button">Import Deck (.txt)</button>
             </div>
             <input type="file" id="deck-file-input" accept=".json" class="hidden-file-input">
             <input type="file" id="deck-txt-file-input" accept=".txt" class="hidden-file-input">
@@ -238,13 +224,6 @@
             <span class="close-button" data-modal="settings-modal">&times;</span>
             <h2>Settings</h2>
             <div class="form-group">
-                <label>Learning Mode:</label>
-                <div class="radio-group">
-                    <label><input type="radio" name="learning-mode" value="spaced"> Spaced Repetition</label>
-                    <label><input type="radio" name="learning-mode" value="simple"> Simple</label>
-                </div>
-            </div>
-            <div class="form-group">
                 <label>Accumulate Daily Limit:</label>
                 <div class="radio-group">
                     <label><input type="radio" name="accumulate-limit" value="no" checked> No</label>
@@ -266,28 +245,6 @@
                 <button id="btn-settings-save" class="modal-action-button accent-button">Save</button>
                 <button class="modal-action-button" data-modal="settings-modal">Cancel</button>
             </div>
-            <div class="form-group">
-                <label class="reset-label">Danger Zone</label>
-                <button id="btn-reset-app-open" class="control-button danger-button">Erase all data and start over…</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Reset App Modal -->
-    <div id="reset-app-modal" class="modal hidden">
-        <div class="modal-content modal-small modal-danger">
-            <span class="close-button" data-modal="reset-app-modal">&times;</span>
-            <h2>Reset App?</h2>
-            <p class="modal-subtitle">This permanently deletes every deck and setting stored in this browser. This cannot be undone.</p>
-            <div id="reset-app-stats" class="info-section"></div>
-            <div class="form-group">
-                <label for="reset-confirm-input">Type <strong>RESET</strong> to confirm:</label>
-                <input type="text" id="reset-confirm-input" autocomplete="off" placeholder="RESET">
-            </div>
-            <div class="modal-button-row">
-                <button id="btn-reset-app-confirm" class="modal-action-button danger-button" disabled>Erase Everything</button>
-                <button class="modal-action-button" data-modal="reset-app-modal">Cancel</button>
-            </div>
         </div>
     </div>
 
@@ -300,7 +257,7 @@
                 <h3>About</h3>
                 <div class="info-section">
                     <strong>Web Flashcards by Mattias</strong>
-                    <p>A browser-based flashcard study app. Create decks, add cards, and study using Simple or Spaced Repetition mode - all from your browser with no server required.</p>
+                    <p>A browser-based flashcard study app. Create decks, add cards, and study using spaced repetition - all from your browser with no server required.</p>
                 </div>
 
                 <h3>Features</h3>
@@ -309,28 +266,19 @@
                     <ul class="info-list">
                         <li><strong>Create decks</strong> - give each deck a name and start adding cards.</li>
                         <li><strong>Rename deck</strong> - select a deck in Manage Decks and click Rename Selected to give it a new name.</li>
-                        <li><strong>Protect deck</strong> - select a deck and click ★ Protect Selected to guard it against accidental deletion. Protected decks are marked with ★ in the list and must be unprotected before they can be deleted.</li>
                         <li><strong>Import/Export</strong> - save decks as <code>.json</code> or <code>.txt</code> files and reload them later.</li>
                         <li><strong>Import from text</strong> - paste or load cards in "Word - Translation" or tab-separated (Anki export) format, one per line.</li>
                     </ul>
                 </div>
                 <div class="info-section">
-                    <strong>Spaced Repetition Mode (SM-2)</strong>
+                    <strong>Spaced Repetition (SM-2)</strong>
                     <ul class="info-list">
                         <li>Cards are scheduled based on how well you know them.</li>
                         <li><strong>Again</strong> (&lt;10m) - failed, review again soon.</li>
                         <li><strong>Hard</strong> (1–2d) - struggled, short interval.</li>
                         <li><strong>Good</strong> (3–7d) - normal, standard interval.</li>
                         <li><strong>Easy</strong> (7d+) - easy, long interval.</li>
-                        <li>Only cards due today (or overdue) appear in your session.</li>
-                    </ul>
-                </div>
-                <div class="info-section">
-                    <strong>Simple Mode</strong>
-                    <ul class="info-list">
-                        <li>Review cards one by one. Rate each as <strong>Remembered</strong> or <strong>Forgot</strong>.</li>
-                        <li>Remembered cards move to Finished. Forgot cards stay in the queue.</li>
-                        <li>Session ends when the daily limit is reached or all cards are finished.</li>
+                        <li>Only new cards and cards due today (or overdue) appear in your session.</li>
                     </ul>
                 </div>
                 <div class="info-section">
@@ -352,6 +300,13 @@
                     </ul>
                 </div>
                 <div class="info-section">
+                    <strong>Older decks</strong>
+                    <ul class="info-list">
+                        <li>Decks saved with the former Simple mode are converted automatically.</li>
+                        <li>Cards you had marked Finished are rescheduled over the following 7–20 days.</li>
+                    </ul>
+                </div>
+                <div class="info-section">
                     <strong>Appearance</strong>
                     <ul class="info-list">
                         <li><strong>Dark / Light mode</strong> - toggle theme with the button.</li>
@@ -363,10 +318,10 @@
                 <div class="info-section">
                     <ul class="info-list">
                         <li><strong>Space / Enter</strong> - show answer (when viewing card front).</li>
-                        <li><strong>1</strong> - Forgot / Again</li>
-                        <li><strong>2</strong> - Remembered / Hard</li>
-                        <li><strong>3</strong> - Good (spaced mode)</li>
-                        <li><strong>4</strong> - Easy (spaced mode)</li>
+                        <li><strong>1</strong> - Again</li>
+                        <li><strong>2</strong> - Hard</li>
+                        <li><strong>3</strong> - Good</li>
+                        <li><strong>4</strong> - Easy</li>
                         <li><strong>Escape</strong> - close any open modal.</li>
                     </ul>
                 </div>
@@ -374,10 +329,6 @@
                 <h3>Technical Notes</h3>
                 <div class="info-section">
                     <p>All data is stored in your browser's <code>localStorage</code>. Nothing is sent to a server. Clearing browser data will erase your decks - export them first as a backup.</p>
-                </div>
-                <div class="info-section">
-                    <strong>Reset App</strong>
-                    <p>Found under Settings → Danger Zone. Permanently erases every deck and setting in this browser, including protected decks, and returns the app to its first-launch state. Requires typing <code>RESET</code> and confirming a second time, since it cannot be undone.</p>
                 </div>
             </div>
             <button class="modal-close-button" data-modal="info-modal">Close</button>

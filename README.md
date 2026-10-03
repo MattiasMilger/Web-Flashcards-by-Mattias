@@ -12,10 +12,10 @@ Open `index.html` in a modern browser. No build tools or dependencies required.
 
 ## Features
 
-- **Two Learning Modes** - Simple mode (Remembered / Forgot) and Spaced Repetition (SM-2 algorithm).
+- **Spaced Repetition** - SM-2 scheduling with Again / Hard / Good / Easy ratings.
 - **Deck Management** - Create, open, rename, and delete multiple decks stored in your browser.
 - **Card Editor** - Add, edit, delete, and search cards within any deck.
-- **Import from .txt** - Create a deck from a `.txt` file. Accepts `Word - Translation` format and tab-separated (Anki export) format.
+- **Import Deck (.txt)** - Create a deck from a `.txt` file. Accepts `Word - Translation` format and tab-separated (Anki export) format.
 - **Import/Export Decks** - Save decks as `.json` or `.txt` files and reload them at any time.
 - **Daily Limit** - Configure how many cards to study per day. Extend when you want more.
 - **Undo Last Rating** - Rewind the last card rating if you made a mistake.
@@ -31,7 +31,7 @@ Open `index.html` in a modern browser. No build tools or dependencies required.
 Web Flashcards by Mattias/
 ├── index.html      # Main HTML structure, layout, and all modals
 ├── style.css       # Styling, theming (CSS variables), responsive design
-├── config.js       # App config, deck storage (localStorage), export/import
+├── config.js       # App config, deck storage (localStorage), migration, export/import
 ├── session.js      # Session logic: queue building, SM-2 algorithm, rewind
 ├── dialogs.js      # Modal dialog logic: deck manager, card editor, settings
 ├── ui.js           # Main UI controller: state machine, rendering, keyboard shortcuts
@@ -42,26 +42,29 @@ Web Flashcards by Mattias/
 
 | Module | Purpose |
 |---|---|
-| `config.js` | App constants, config and deck persistence in `localStorage`, export/import |
+| `config.js` | App constants, config and deck persistence in `localStorage`, deck schema migration, export/import |
 | `session.js` | Queue building, SM-2 spaced repetition, card rating, rewind, stats |
 | `dialogs.js` | All modal dialogs: deck manager, card editor, add/edit cards, import, settings |
 | `ui.js` | Application state machine, card rendering, event wiring, keyboard shortcuts |
 
-## Learning Modes
+## Spaced Repetition (SM-2)
 
-### Spaced Repetition (SM-2) - Default
 Cards are scheduled based on your performance. Rate each card as:
 - **Again** (<10m) - failed, shown again soon.
 - **Hard** (1–2d) - struggled, short interval.
 - **Good** (3–7d) - normal, standard interval.
 - **Easy** (7d+) - easy, long interval.
 
-The interval between reviews grows each time you rate a card as Good or Easy, following the SM-2 algorithm. Cards only appear when they are due.
+The interval between reviews grows each time you rate a card as Good or Easy, following the SM-2 algorithm. New cards and cards that are due appear in each session, up to the daily limit.
 
-### Simple Mode
-Cards are marked as **To Review** or **Finished**. Each session reviews cards up to the daily limit. Rate each card as:
-- **Remembered** - card moves to Finished.
-- **Forgot** - card stays in the queue.
+## Older Saves (Simple Mode Removed)
+
+The app used to have a second, Simple mode (Remembered / Forgot). It has been removed. Decks saved by earlier versions are converted automatically the first time the app loads, and the same conversion is applied to imported `.json` decks:
+
+- Cards you had marked **Finished** are scheduled for review 7–20 days from the day of conversion (spread out so they don't all come due at once).
+- All other cards keep their spaced-repetition progress, or start as new cards if they had none.
+- Invalid or missing fields (dates, intervals, ease factors, counters, limits) are repaired, and snake_case exports from the desktop Python app are accepted.
+- Converted decks carry `schemaVersion: 2`. `learningMode` is kept as `"spaced"` in the data for compatibility.
 
 ## Importing Decks from a Text File
 
@@ -88,18 +91,18 @@ Both formats can be mixed freely in the same file. Lines that cannot be parsed a
 
 **How to import:**
 1. Open **Manage Decks**
-2. Click **Import from .txt**
+2. Click **Import Deck (.txt)**
 3. Select your `.txt` file
 
 The deck is created automatically, named after the filename (minus the `.txt` extension).
 
-You can also add cards from a `.txt` file into an *existing* deck via **Edit Cards → Import from Text**, which loads the file into a preview textarea before importing.
+You can also add cards from a `.txt` file into an *existing* deck via **Edit Cards → Import Cards**, which loads the file into a preview textarea before importing.
 
 ## How It Works
 
-1. **Configuration** loads from `localStorage` on startup. Last-used deck is reopened automatically.
+1. **Configuration** loads from `localStorage` on startup (older decks are migrated). Last-used deck is reopened automatically.
 2. **Session queue** is built from cards that are due (or not yet started), up to the daily limit.
-3. The app shows the **card front** (word). Click "Show Answer" or press Space to reveal the back.
+3. The app shows the **card front**. Click "Show Answer" or press Space to reveal the back.
 4. **Rate the card** using the buttons or keyboard shortcuts (1–4). The card is updated and saved immediately.
 5. **Undo** the last rating at any time with the "↩ Undo Last Rating" button.
 6. When the session ends, use **Study More Cards** to extend the session.
@@ -113,10 +116,10 @@ Select any deck in **Manage Decks** and click **Rename Selected**. Enter the new
 | Key | Action |
 |-----|--------|
 | Space / Enter | Show Answer |
-| 1 | Forgot / Again |
-| 2 | Remembered / Hard |
-| 3 | Good (spaced mode) |
-| 4 | Easy (spaced mode) |
+| 1 | Again |
+| 2 | Hard |
+| 3 | Good |
+| 4 | Easy |
 | Escape | Close modal |
 
 ## Technical Notes
@@ -134,7 +137,3 @@ Works in all modern browsers (Chrome, Firefox, Edge, Safari). Requires JavaScrip
 **Developer**: Mattias Milger
 **Email**: mattias.r.milger@gmail.com
 **GitHub**: [MattiasMilger](https://github.com/MattiasMilger)
-
-## More Projects
-
-Check out more of my work at [mattiasmilger.github.io](https://mattiasmilger.github.io/).

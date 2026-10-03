@@ -8,6 +8,8 @@ const Session = (() => {
     let currentIndex = 0;    // Position in queue
     let rewindBackup = null; // Saved state for undo
 
+    const RATINGS = ['again', 'hard', 'good', 'easy'];
+
     // ========================
     // Date helpers
     // ========================
@@ -54,8 +56,8 @@ const Session = (() => {
     // ========================
 
     /**
-     * Build the session queue from the deck cards.
-     * Respects daily limit and learning mode.
+     * Build the session queue: new cards and cards due today or overdue,
+     * shuffled, up to the remaining daily limit.
      */
     function buildQueue(deck) {
         checkDayReset(deck);
@@ -65,15 +67,7 @@ const Session = (() => {
         const alreadyDone = deck.cardsReviewedToday || 0;
         const remaining = Math.max(0, effectiveLimit - alreadyDone);
 
-        let candidates = [];
-
-        if (deck.learningMode === 'spaced') {
-            // Cards with no due date (new) or due date <= today
-            candidates = deck.cards.filter(c => !c.dueDate || c.dueDate <= today);
-        } else {
-            // Simple mode: any card that isn't finished (includes SPACED cards from previous mode)
-            candidates = deck.cards.filter(c => c.sessionStatus !== 'FINISHED');
-        }
+        const candidates = deck.cards.filter(c => !c.dueDate || c.dueDate <= today);
 
         // Shuffle candidates
         for (let i = candidates.length - 1; i > 0; i--) {
@@ -112,12 +106,11 @@ const Session = (() => {
     // ========================
 
     /**
-     * Rate the current card.
-     * Simple mode:  rating = 'forgot' | 'remembered'
-     * Spaced mode:  rating = 'again' | 'hard' | 'good' | 'easy'
+     * Rate the current card: 'again' | 'hard' | 'good' | 'easy'
      */
     function rateCard(deck, rating) {
         if (currentIndex >= queue.length) return;
+        if (!RATINGS.includes(rating)) return;
 
         const queueCard = queue[currentIndex];
 
@@ -136,17 +129,7 @@ const Session = (() => {
             accumulatedExtra: deck.accumulatedExtra || 0
         };
 
-        const today = getTodayStr();
-
-        if (deck.learningMode === 'spaced') {
-            applySpacedRating(deckCard, rating, today);
-        } else {
-            // Simple mode
-            if (rating === 'remembered') {
-                deckCard.sessionStatus = 'FINISHED';
-            }
-            // 'forgot' keeps sessionStatus as 'TO_REVIEW'
-        }
+        applySpacedRating(deckCard, rating, getTodayStr());
 
         deck.cardsReviewedToday = (deck.cardsReviewedToday || 0) + 1;
         // Drain accumulated extra before counting against the base daily limit
@@ -230,18 +213,9 @@ const Session = (() => {
      */
     function getDeckStats(deck) {
         const today = getTodayStr();
-
-        if (deck.learningMode === 'spaced') {
-            const total = deck.cards.length;
-            const due = deck.cards.filter(c => !c.dueDate || c.dueDate <= today).length;
-            const upcoming = deck.cards.filter(c => c.dueDate && c.dueDate > today).length;
-            return { mode: 'spaced', total, due, upcoming };
-        } else {
-            const total = deck.cards.length;
-            const finished = deck.cards.filter(c => c.sessionStatus === 'FINISHED').length;
-            const toReview = deck.cards.filter(c => c.sessionStatus !== 'FINISHED').length;
-            return { mode: 'simple', total, finished, toReview };
-        }
+        const total = deck.cards.length;
+        const due = deck.cards.filter(c => !c.dueDate || c.dueDate <= today).length;
+        return { total, due, upcoming: total - due };
     }
 
     return {
