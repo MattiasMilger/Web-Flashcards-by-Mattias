@@ -116,6 +116,7 @@ const DeckManager = (() => {
 
     function updateButtons() {
         SELECTION_BUTTONS.forEach(id => { $(id).disabled = !selected; });
+
     }
 
     function requireSelection(verb) {

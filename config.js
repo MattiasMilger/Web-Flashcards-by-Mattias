@@ -183,6 +183,7 @@ const Config = (() => {
             config.currentDeckName = null;
         }
         save();
+        return true;
     }
 
     /**
