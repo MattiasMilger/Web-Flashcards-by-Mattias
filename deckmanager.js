@@ -97,10 +97,6 @@ const DeckManager = (() => {
             list.appendChild(item);
         });
 
-        const lbl = $('deck-current-label');
-        lbl.textContent = names.includes(currentName) ? `Currently open: ${currentName}` : 'No deck is open right now';
-        lbl.classList.toggle('none', !names.includes(currentName));
-
         updateButtons();
     }
 

@@ -1211,27 +1211,10 @@ footer a:hover {
     flex-shrink: 0;
 }
 
-.deck-current-label {
-    margin: 0 0 8px 0;
-    padding: 8px 12px;
-    border-radius: 6px;
-    background-color: color-mix(in srgb, var(--accent-color) 15%, var(--container-bg));
+.deck-item.is-open .deck-item-name::after {
+    content: " (open)";
     color: var(--accent-color);
     font-weight: bold;
-    overflow-wrap: anywhere;
-}
-
-.deck-current-label.none {
-    background-color: var(--entry-bg);
-    color: var(--summary-color);
-    font-weight: normal;
-    font-style: italic;
-}
-
-
-.deck-item.is-open .deck-item-name::before {
-    content: "\2192\00a0";
-    color: var(--accent-color);
-    font-weight: bold;
+    font-size: 0.85em;
 }
 
