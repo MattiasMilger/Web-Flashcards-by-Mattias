@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Web Flashcards by Mattias</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=3">
 </head>
 <body class="dark-mode">
     <div class="container">
@@ -128,6 +128,7 @@
                 <button id="btn-deck-open" class="modal-action-button accent-button">Open</button>
                 <button id="btn-deck-rename" class="modal-action-button">Rename</button>
                 <button id="btn-deck-export" class="modal-action-button">Export…</button>
+                <button id="btn-deck-protect" class="modal-action-button">&#9733;&#xFE0E; Protect</button>
                 <button id="btn-deck-delete" class="modal-action-button danger-button">Delete</button>
             </div>
 
@@ -323,6 +324,7 @@
                     <ul class="info-list">
                         <li><strong>Create decks</strong> - give each deck a name and start adding cards.</li>
                         <li><strong>Premade decks</strong> - in Manage Decks, tap <em>Browse Premade Decks</em> to add ready-made vocabulary decks (Spanish, French, German, Italian, Portuguese, Polish, Ukrainian, Japanese, Mandarin, Korean, Indonesian, Swedish, Turkish).</li>
+                        <li><strong>Protect deck</strong> - select a deck and click Protect to lock it against accidental deletion (a star marks protected decks). Click Unprotect to allow deleting it again.</li>
                         <li><strong>Rename deck</strong> - select a deck in Manage Decks and click Rename to give it a new name.</li>
                         <li><strong>Import/Export</strong> - save decks as <code>.json</code> or <code>.txt</code> files and reload them later.</li>
                         <li><strong>Import from text</strong> - paste or load cards in "Word - Translation" or tab-separated (Anki export) format, one per line.</li>
@@ -397,11 +399,11 @@
         <p><a href="https://github.com/MattiasMilger/Web-Flashcards-by-Mattias" target="_blank" rel="noopener noreferrer">GitHub Repository</a></p>
     </footer>
 
-    <script src="premade.js"></script>
-    <script src="config.js"></script>
-    <script src="session.js"></script>
-    <script src="dialogs.js"></script>
-    <script src="deckmanager.js"></script>
-    <script src="ui.js"></script>
+    <script src="premade.js?v=3"></script>
+    <script src="config.js?v=3"></script>
+    <script src="session.js?v=3"></script>
+    <script src="dialogs.js?v=3"></script>
+    <script src="deckmanager.js?v=3"></script>
+    <script src="ui.js?v=3"></script>
 </body>
 </html>
