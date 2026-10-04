@@ -230,18 +230,8 @@ const Config = (() => {
     }
 
     function createExampleDeck() {
-        const deck = createEmptyDeck('Spanish Basics (Example)');
-        deck.dailyLimit = 5;
-        const pairs = [
-            ['Hola', 'Hello'], ['Adiós', 'Goodbye'], ['Gracias', 'Thank you'],
-            ['Por favor', 'Please'], ['Sí', 'Yes'], ['Lo siento', 'I am sorry'],
-            ['Gato', 'Cat'], ['Perro', 'Dog'], ['Agua', 'Water'],
-            ['Pan', 'Bread'], ['Casa', 'House'], ['Libro', 'Book']
-        ];
-        deck.cards = pairs.map(([word, translation]) => ({
-            word, translation, sessionStatus: 'TO_REVIEW', dueDate: null, interval: 1, easeFactor: 2.5
-        }));
-        return deck;
+        // First-launch default: the premade "Spanish - English" deck
+        return Premade.buildDeck('spanish');
     }
 
     // ========================

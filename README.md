@@ -13,6 +13,7 @@ Open `index.html` in a modern browser. No build tools or dependencies required.
 ## Features
 
 - **Spaced Repetition** - SM-2 scheduling with Again / Hard / Good / Easy ratings.
+- **Premade Decks** - One-tap vocabulary decks for Spanish, French, German, Italian, Portuguese, Polish, Ukrainian, Japanese, Mandarin, Korean, Indonesian, Swedish and Turkish.
 - **Deck Management** - Create, open, rename, and delete multiple decks stored in your browser.
 - **Card Editor** - Add, edit, delete, and search cards within any deck.
 - **Import Deck (.txt)** - Create a deck from a `.txt` file. Accepts `Word - Translation` format and tab-separated (Anki export) format.
@@ -31,9 +32,11 @@ Open `index.html` in a modern browser. No build tools or dependencies required.
 Web Flashcards by Mattias/
 ├── index.html      # Main HTML structure, layout, and all modals
 ├── style.css       # Styling, theming (CSS variables), responsive design
+├── premade.js      # Built-in premade vocabulary decks
 ├── config.js       # App config, deck storage (localStorage), migration, export/import
 ├── session.js      # Session logic: queue building, SM-2 algorithm, rewind
-├── dialogs.js      # Modal dialog logic: deck manager, card editor, settings
+├── dialogs.js      # Modal dialog logic: card editor, card add/edit, import, settings
+├── deckmanager.js  # Manage Decks dialog: deck list, premade browser, import/export
 ├── ui.js           # Main UI controller: state machine, rendering, keyboard shortcuts
 └── README.md       # This file
 ```
@@ -44,7 +47,9 @@ Web Flashcards by Mattias/
 |---|---|
 | `config.js` | App constants, config and deck persistence in `localStorage`, deck schema migration, export/import |
 | `session.js` | Queue building, SM-2 spaced repetition, card rating, rewind, stats |
-| `dialogs.js` | All modal dialogs: deck manager, card editor, add/edit cards, import, settings |
+| `premade.js` | Premade decks (compact text data) and the builder that turns them into decks |
+| `deckmanager.js` | Manage Decks dialog: single-select deck list, premade browser, import/export |
+| `dialogs.js` | Card editor, add/edit cards, import cards, settings |
 | `ui.js` | Application state machine, card rendering, event wiring, keyboard shortcuts |
 
 ## Spaced Repetition (SM-2)
@@ -65,6 +70,10 @@ The app used to have a second, Simple mode (Remembered / Forgot). It has been re
 - All other cards keep their spaced-repetition progress, or start as new cards if they had none.
 - Invalid or missing fields (dates, intervals, ease factors, counters, limits) are repaired, and snake_case exports from the desktop Python app are accepted.
 - Converted decks carry `schemaVersion: 2`. `learningMode` is kept as `"spaced"` in the data for compatibility.
+
+## Premade Decks
+
+Open **Manage Decks** and tap **Browse Premade Decks**. Each deck is named `Language - English` (foreign word on the front). The default first-launch deck is a 200-card Spanish deck, and every premade deck has exactly 200 cards. Add more languages by adding an entry to `premade.js`.
 
 ## Importing Decks from a Text File
 
@@ -91,8 +100,8 @@ Both formats can be mixed freely in the same file. Lines that cannot be parsed a
 
 **How to import:**
 1. Open **Manage Decks**
-2. Click **Import Deck (.txt)**
-3. Select your `.txt` file
+2. Click **Import from File…**
+3. Choose **.txt** and select your file
 
 The deck is created automatically, named after the filename (minus the `.txt` extension).
 
@@ -109,7 +118,7 @@ You can also add cards from a `.txt` file into an *existing* deck via **Edit Car
 
 ## Renaming a Deck
 
-Select any deck in **Manage Decks** and click **Rename Selected**. Enter the new name and press Enter or click Rename. The deck's cards and progress are preserved; the name is updated everywhere including the status bar if the deck is currently open.
+Select any deck in **Manage Decks** and click **Rename**. Enter the new name and press Enter or click Rename. The deck's cards and progress are preserved; the name is updated everywhere including the status bar if the deck is currently open.
 
 ## Keyboard Shortcuts
 

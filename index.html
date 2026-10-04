@@ -102,24 +102,81 @@
         <div class="modal-content modal-large">
             <span class="close-button" data-modal="deck-manager-modal">&times;</span>
             <h2>Manage Decks</h2>
-            <div class="feed-list-container">
-                <select id="deck-listbox" size="8" class="feed-listbox"></select>
+
+            <!-- Beginner pointer -->
+            <button id="btn-premade-open" class="premade-banner" type="button">
+                <span class="premade-banner-icon" aria-hidden="true">
+                    <svg viewBox="0 0 48 48" width="1em" height="1em" fill="currentColor">
+                        <rect x="14" y="4" width="28" height="34" rx="4" opacity="0.35"/>
+                        <rect x="9" y="9" width="28" height="34" rx="4" opacity="0.65"/>
+                        <rect x="4" y="14" width="28" height="30" rx="4"/>
+                    </svg>
+                </span>
+                <span class="premade-banner-text">
+                    <span class="premade-banner-new">NEW HERE?</span>
+                    <strong>Browse Premade Decks</strong>
+                    <small>Spanish, French, Japanese, Polish, Ukrainian and more: one tap to add</small>
+                </span>
+                <span class="premade-banner-arrow">➜</span>
+            </button>
+
+            <h3 class="dm-heading">Your decks</h3>
+            <p id="deck-current-label" class="deck-current-label"></p>
+            <div id="deck-list" class="deck-list" role="listbox" aria-label="Your decks"></div>
+
+            <div class="dm-actions">
+                <button id="btn-deck-open" class="modal-action-button accent-button">Open</button>
+                <button id="btn-deck-rename" class="modal-action-button">Rename</button>
+                <button id="btn-deck-export" class="modal-action-button">Export…</button>
+                <button id="btn-deck-delete" class="modal-action-button danger-button">Delete</button>
             </div>
-            <div class="modal-button-row">
-                <button id="btn-deck-open" class="modal-action-button accent-button">Open Selected</button>
-                <button id="btn-deck-new" class="modal-action-button">New Deck</button>
-                <button id="btn-deck-rename" class="modal-action-button">Rename Selected</button>
-                <button id="btn-deck-delete" class="modal-action-button danger-button">Delete Selected</button>
+
+            <h3 class="dm-heading">Add a deck</h3>
+            <div class="dm-actions">
+                <button id="btn-deck-new" class="modal-action-button">＋ New Empty Deck</button>
+                <button id="btn-deck-import" class="modal-action-button">Import from File…</button>
             </div>
-            <div class="modal-button-row">
-                <button id="btn-deck-export" class="modal-action-button">Export Deck (.json)</button>
-                <button id="btn-deck-export-txt" class="modal-action-button">Export Deck (.txt)</button>
-                <button id="btn-deck-import-trigger" class="modal-action-button">Import Deck (.json)</button>
-                <button id="btn-deck-import-txt-trigger" class="modal-action-button">Import Deck (.txt)</button>
-            </div>
+
             <input type="file" id="deck-file-input" accept=".json" class="hidden-file-input">
             <input type="file" id="deck-txt-file-input" accept=".txt" class="hidden-file-input">
             <button class="modal-close-button" data-modal="deck-manager-modal">Close</button>
+        </div>
+    </div>
+
+    <!-- Premade Decks Modal -->
+    <div id="premade-modal" class="modal hidden">
+        <div class="modal-content modal-large">
+            <span class="close-button" data-modal="premade-modal">&times;</span>
+            <h2>Premade Decks</h2>
+            <p class="modal-subtitle">Pick a language and tap <strong>+ Add</strong>. Front is the foreign word, back is the English meaning. You can edit any deck afterwards.</p>
+            <div id="premade-grid" class="premade-grid"></div>
+            <button class="modal-close-button" data-modal="premade-modal">Close</button>
+        </div>
+    </div>
+
+    <!-- Export Deck Modal -->
+    <div id="export-deck-modal" class="modal hidden">
+        <div class="modal-content modal-small">
+            <span class="close-button" data-modal="export-deck-modal">&times;</span>
+            <h2>Export Deck</h2>
+            <p class="modal-subtitle"><strong>.json</strong> keeps your study progress (best for backups). <strong>.txt</strong> is just the words (works with Anki).</p>
+            <div class="modal-button-row">
+                <button id="btn-export-json" class="modal-action-button accent-button">Export .json</button>
+                <button id="btn-export-txt" class="modal-action-button">Export .txt</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Import Deck From File Modal -->
+    <div id="import-deck-modal" class="modal hidden">
+        <div class="modal-content modal-small">
+            <span class="close-button" data-modal="import-deck-modal">&times;</span>
+            <h2>Import from File</h2>
+            <p class="modal-subtitle"><strong>.json</strong> restores a deck exported from this app. <strong>.txt</strong> creates a deck from "Word - Translation" or tab-separated lines.</p>
+            <div class="modal-button-row">
+                <button id="btn-import-json" class="modal-action-button accent-button">Choose .json</button>
+                <button id="btn-import-txt" class="modal-action-button">Choose .txt</button>
+            </div>
         </div>
     </div>
 
@@ -265,7 +322,8 @@
                     <strong>Deck Management</strong>
                     <ul class="info-list">
                         <li><strong>Create decks</strong> - give each deck a name and start adding cards.</li>
-                        <li><strong>Rename deck</strong> - select a deck in Manage Decks and click Rename Selected to give it a new name.</li>
+                        <li><strong>Premade decks</strong> - in Manage Decks, tap <em>Browse Premade Decks</em> to add ready-made vocabulary decks (Spanish, French, German, Italian, Portuguese, Polish, Ukrainian, Japanese, Mandarin, Korean, Indonesian, Swedish, Turkish).</li>
+                        <li><strong>Rename deck</strong> - select a deck in Manage Decks and click Rename to give it a new name.</li>
                         <li><strong>Import/Export</strong> - save decks as <code>.json</code> or <code>.txt</code> files and reload them later.</li>
                         <li><strong>Import from text</strong> - paste or load cards in "Word - Translation" or tab-separated (Anki export) format, one per line.</li>
                     </ul>
@@ -339,9 +397,11 @@
         <p><a href="https://github.com/MattiasMilger/Web-Flashcards-by-Mattias" target="_blank" rel="noopener noreferrer">GitHub Repository</a></p>
     </footer>
 
+    <script src="premade.js"></script>
     <script src="config.js"></script>
     <script src="session.js"></script>
     <script src="dialogs.js"></script>
+    <script src="deckmanager.js"></script>
     <script src="ui.js"></script>
 </body>
 </html>

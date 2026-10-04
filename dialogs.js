@@ -50,32 +50,8 @@ const Dialogs = (() => {
     // ========================
 
     function initEventListeners() {
-        // Deck manager
-        document.getElementById('btn-deck-open').addEventListener('click', openSelectedDeck);
-        document.getElementById('btn-deck-new').addEventListener('click', openNewDeckModal);
-        document.getElementById('btn-deck-rename').addEventListener('click', openRenameDeckModal);
-        document.getElementById('btn-deck-delete').addEventListener('click', deleteSelectedDeck);
-        document.getElementById('btn-deck-export').addEventListener('click', exportSelectedDeck);
-        document.getElementById('btn-deck-export-txt').addEventListener('click', exportSelectedDeckTxt);
-        document.getElementById('btn-deck-import-trigger').addEventListener('click', triggerDeckImport);
-        document.getElementById('deck-file-input').addEventListener('change', handleDeckImportFile);
-        document.getElementById('btn-deck-import-txt-trigger').addEventListener('click', () => {
-            document.getElementById('deck-txt-file-input').value = '';
-            document.getElementById('deck-txt-file-input').click();
-        });
-        document.getElementById('deck-txt-file-input').addEventListener('change', handleDeckImportTxtFile);
-        document.getElementById('btn-new-deck-create').addEventListener('click', createNewDeck);
-
-        // Allow Enter in deck name field to create
-        document.getElementById('new-deck-name').addEventListener('keydown', e => {
-            if (e.key === 'Enter') createNewDeck();
-        });
-
-        // Rename deck
-        document.getElementById('btn-rename-deck-confirm').addEventListener('click', confirmRenameDeck);
-        document.getElementById('rename-deck-name').addEventListener('keydown', e => {
-            if (e.key === 'Enter') confirmRenameDeck();
-        });
+        // Deck manager (see deckmanager.js)
+        DeckManager.init();
 
         // Card editor
         document.getElementById('card-search').addEventListener('input', () => {
@@ -128,244 +104,6 @@ const Dialogs = (() => {
             Session.buildQueue(deck);
             UI.updateState();
         }
-    }
-
-    // ========================
-    // Deck Manager
-    // ========================
-
-    function openDeckManager() {
-        refreshDeckList();
-        openModal('deck-manager-modal');
-    }
-
-    function refreshDeckList() {
-        const listbox = document.getElementById('deck-listbox');
-        listbox.innerHTML = '';
-
-        const names = Config.getDeckNames();
-        const currentName = Config.getConfig().currentDeckName;
-
-        if (names.length === 0) {
-            const opt = document.createElement('option');
-            opt.disabled = true;
-            opt.textContent = '(No decks yet - create or import one)';
-            listbox.appendChild(opt);
-            return;
-        }
-
-        names.forEach(name => {
-            const deck = Config.loadDeck(name);
-            const count = deck ? deck.cards.length : 0;
-            const opt   = document.createElement('option');
-            opt.value   = name;
-            opt.textContent = `${name} - ${count} card${count !== 1 ? 's' : ''}${name === currentName ? ' ✓' : ''}`;
-            listbox.appendChild(opt);
-        });
-    }
-
-    function openSelectedDeck() {
-        const listbox  = document.getElementById('deck-listbox');
-        const selected = listbox.value;
-        if (!selected) { UI.showMessage('Please select a deck.', 'warning'); return; }
-
-        UI.openDeck(selected);
-        closeModal('deck-manager-modal');
-    }
-
-    function openNewDeckModal() {
-        document.getElementById('new-deck-name').value = '';
-        openModal('new-deck-modal');
-        setTimeout(() => document.getElementById('new-deck-name').focus(), 50);
-    }
-
-    function createNewDeck() {
-        const name = document.getElementById('new-deck-name').value.trim();
-        if (!name) { UI.showMessage('Please enter a deck name.', 'error'); return; }
-
-        if (Config.getDeckNames().includes(name)) {
-            UI.showMessage(`A deck named "${name}" already exists.`, 'error');
-            return;
-        }
-
-        const deck = Config.createEmptyDeck(name);
-        Config.saveDeck(deck);
-        closeModal('new-deck-modal');
-        refreshDeckList();
-        UI.openDeck(name);
-        closeModal('deck-manager-modal');
-        UI.showMessage(`Deck "${name}" created.`, 'success');
-    }
-
-    function openRenameDeckModal() {
-        const listbox  = document.getElementById('deck-listbox');
-        const selected = listbox.value;
-        if (!selected) { UI.showMessage('Please select a deck to rename.', 'warning'); return; }
-
-        document.getElementById('rename-deck-name').value = selected;
-        openModal('rename-deck-modal');
-        setTimeout(() => {
-            const input = document.getElementById('rename-deck-name');
-            input.focus();
-            input.select();
-        }, 50);
-    }
-
-    function confirmRenameDeck() {
-        const listbox  = document.getElementById('deck-listbox');
-        const oldName  = listbox.value;
-        const newName  = document.getElementById('rename-deck-name').value.trim();
-
-        if (!newName) { UI.showMessage('Please enter a new deck name.', 'error'); return; }
-        if (newName === oldName) { closeModal('rename-deck-modal'); return; }
-
-        if (Config.getDeckNames().includes(newName)) {
-            UI.showMessage(`A deck named "${newName}" already exists.`, 'error');
-            return;
-        }
-
-        const success = Config.renameDeck(oldName, newName);
-        if (!success) {
-            UI.showMessage('Failed to rename deck.', 'error');
-            return;
-        }
-
-        // If the renamed deck is currently open, update the in-memory reference
-        const currentDeck = UI.getCurrentDeck();
-        if (currentDeck && currentDeck.name === oldName) {
-            currentDeck.name = newName;
-            UI.renderDeckStatus();
-        }
-
-        closeModal('rename-deck-modal');
-        refreshDeckList();
-        // Re-select the renamed deck in the listbox
-        listbox.value = newName;
-        UI.showMessage(`Deck renamed to "${newName}".`, 'success', 3000);
-    }
-
-    function deleteSelectedDeck() {
-        const listbox  = document.getElementById('deck-listbox');
-        const selected = listbox.value;
-        if (!selected) { UI.showMessage('Please select a deck to delete.', 'warning'); return; }
-
-        if (!confirm(`Delete deck "${selected}"? This cannot be undone.`)) return;
-
-        Config.deleteDeck(selected);
-        refreshDeckList();
-
-        if (!Config.getConfig().currentDeckName) {
-            UI.setCurrentDeck(null);
-            UI.updateState();
-        }
-
-        UI.showMessage(`Deck "${selected}" deleted.`, 'info');
-    }
-
-    function exportSelectedDeck() {
-        const listbox  = document.getElementById('deck-listbox');
-        const selected = listbox.value;
-        if (!selected) { UI.showMessage('Please select a deck to export.', 'warning'); return; }
-
-        const deck = Config.loadDeck(selected);
-        if (!deck) return;
-
-        Config.exportDeck(deck);
-        UI.showMessage(`Deck "${selected}" exported.`, 'success', 3000);
-    }
-
-    function exportSelectedDeckTxt() {
-        const listbox  = document.getElementById('deck-listbox');
-        const selected = listbox.value;
-        if (!selected) { UI.showMessage('Please select a deck to export.', 'warning'); return; }
-
-        const deck = Config.loadDeck(selected);
-        if (!deck) return;
-
-        Config.exportDeckTxt(deck);
-        UI.showMessage(`Deck "${selected}" exported as .txt.`, 'success', 3000);
-    }
-
-    function triggerDeckImport() {
-        const fi = document.getElementById('deck-file-input');
-        fi.value = '';
-        fi.click();
-    }
-
-    function handleDeckImportFile(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-
-        const reader = new FileReader();
-        reader.onload = e => {
-            try {
-                const data   = JSON.parse(e.target.result);
-                const result = Config.importDeck(data); // normalizes old/Simple-mode decks
-
-                if (typeof result === 'string') {
-                    UI.showMessage(result, 'error');
-                    return;
-                }
-
-                // Resolve name conflict
-                let finalName = result.name;
-                if (Config.getDeckNames().includes(finalName)) {
-                    finalName = finalName + ' (imported)';
-                    result.name = finalName;
-                }
-
-                Config.saveDeck(result);
-                refreshDeckList();
-                UI.showMessage(
-                    `Deck "${finalName}" imported (${result.cards.length} cards).`,
-                    'success'
-                );
-            } catch (err) {
-                UI.showMessage('Failed to parse deck file: ' + err.message, 'error');
-            }
-        };
-        reader.readAsText(file);
-    }
-
-    function handleDeckImportTxtFile(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-
-        const reader = new FileReader();
-        reader.onload = e => {
-            const lines = e.target.result.split('\n').filter(l => l.trim());
-            const cards = [];
-            const skipped = [];
-
-            lines.forEach(line => {
-                if (line.startsWith('#')) return; // Anki export comment/header lines
-                const parsed = parseTxtLine(line);
-                if (parsed) {
-                    cards.push(newCard(parsed.word, parsed.translation));
-                } else { skipped.push(line); }
-            });
-
-            if (cards.length === 0) {
-                UI.showMessage('No valid cards found. Use "Word - Translation" or tab-separated (Anki) format.', 'error');
-                return;
-            }
-
-            // Use filename (without extension) as deck name
-            let deckName = file.name.replace(/\.txt$/i, '').trim() || 'Imported Deck';
-            if (Config.getDeckNames().includes(deckName)) {
-                deckName = deckName + ' (imported)';
-            }
-
-            const deck = Config.createEmptyDeck(deckName);
-            deck.cards = cards;
-            Config.saveDeck(deck);
-            refreshDeckList();
-
-            let msg = `Deck "${deckName}" created with ${cards.length} card(s).`;
-            if (skipped.length > 0) msg += ` ${skipped.length} line(s) skipped.`;
-            UI.showMessage(msg, 'success');
-        };
-        reader.readAsText(file);
     }
 
     // ========================
@@ -747,9 +485,13 @@ const Dialogs = (() => {
         initCloseButtons,
         initEventListeners,
 
-        // Deck manager
-        openDeckManager,
-        refreshDeckList,
+        // Deck manager (implemented in deckmanager.js)
+        openDeckManager: () => DeckManager.open(),
+        refreshDeckList: () => DeckManager.refresh(),
+
+        // Shared helpers
+        parseTxtLine,
+        newCard,
 
         // Card editor
         openCardEditor,

@@ -973,3 +973,264 @@ footer a:hover {
         padding: 0 10px;
     }
 }
+
+/* ===== Manage Decks redesign (append to the end of style.css) ===== */
+
+.dm-heading {
+    margin-top: 18px;
+}
+
+/* --- Premade banner (beginner pointer) --- */
+.premade-banner {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    padding: 14px 16px;
+    margin: 4px 0 6px 0;
+    border: 2px solid var(--accent-color);
+    border-radius: 10px;
+    background: linear-gradient(135deg,
+        color-mix(in srgb, var(--accent-color) 22%, var(--container-bg)),
+        color-mix(in srgb, var(--accent-color) 6%, var(--container-bg)));
+    color: var(--fg-color);
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent-color) 50%, transparent);
+    animation: premade-pulse 2.4s ease-out infinite;
+    touch-action: manipulation;
+}
+
+.premade-banner:hover {
+    background: color-mix(in srgb, var(--accent-color) 25%, var(--container-bg));
+}
+
+.premade-banner-icon {
+    font-size: 2.2em;
+    line-height: 1;
+}
+
+.premade-banner-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+    min-width: 0;
+}
+
+.premade-banner-text strong {
+    font-size: 1.15em;
+    color: var(--accent-color);
+}
+
+.premade-banner-text small {
+    color: var(--summary-color);
+    font-size: 0.82em;
+    line-height: 1.35;
+}
+
+.premade-banner-new {
+    align-self: flex-start;
+    font-size: 0.68em;
+    font-weight: bold;
+    letter-spacing: 0.08em;
+    color: white;
+    background: var(--accent-color);
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+
+.premade-banner-arrow {
+    font-size: 1.8em;
+    color: var(--accent-color);
+    animation: premade-nudge 1.2s ease-in-out infinite;
+}
+
+@keyframes premade-pulse {
+    0%   { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent-color) 45%, transparent); }
+    70%  { box-shadow: 0 0 0 12px transparent; }
+    100% { box-shadow: 0 0 0 0 transparent; }
+}
+
+@keyframes premade-nudge {
+    0%, 100% { transform: translateX(0); }
+    50%      { transform: translateX(6px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .premade-banner,
+    .premade-banner-arrow { animation: none; }
+}
+
+/* --- Single-select deck list (replaces the native <select>) --- */
+.deck-list {
+    max-height: 240px;
+    overflow-y: auto;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background-color: var(--entry-bg);
+    margin-bottom: 12px;
+}
+
+.deck-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--separator-color);
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+}
+
+.deck-item:last-child {
+    border-bottom: none;
+}
+
+.deck-item:hover {
+    background-color: color-mix(in srgb, var(--accent-color) 10%, var(--entry-bg));
+}
+
+.deck-item.selected {
+    background-color: color-mix(in srgb, var(--accent-color) 22%, var(--entry-bg));
+    box-shadow: inset 4px 0 0 var(--accent-color);
+    font-weight: bold;
+}
+
+.deck-item-name {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.deck-item-meta {
+    flex-shrink: 0;
+    font-size: 0.8em;
+    color: var(--summary-color);
+    font-weight: normal;
+}
+
+.deck-list-empty {
+    margin: 0;
+    padding: 24px 16px;
+    text-align: center;
+    color: var(--summary-color);
+    font-style: italic;
+}
+
+/* --- Grouped action rows --- */
+.dm-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+/* --- Premade grid --- */
+.premade-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 55vh;
+    overflow-y: auto;
+    padding-right: 2px;
+    margin-bottom: 10px;
+}
+
+.premade-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background-color: var(--entry-bg);
+    border: 1px solid var(--border-color);
+    border-left: 4px solid var(--accent-color);
+    border-radius: 8px;
+}
+
+.premade-card.owned {
+    border-left-color: var(--success-color);
+    opacity: 0.85;
+}
+
+.premade-flag {
+    font-size: 2em;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.premade-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.premade-title {
+    font-weight: bold;
+    color: var(--headline-color);
+}
+
+.premade-meta {
+    font-size: 0.8em;
+    color: var(--category-color);
+    margin: 2px 0;
+}
+
+.premade-blurb {
+    font-size: 0.85em;
+    color: var(--summary-color);
+    line-height: 1.35;
+}
+
+.premade-card .modal-action-button {
+    flex: 0 0 auto;
+    min-width: 76px;
+}
+
+@media (max-width: 600px) {
+    .premade-banner-text small { display: none; }
+    .dm-actions { grid-template-columns: 1fr 1fr; }
+}
+
+/* ===== Monochrome icon badge + open-deck emphasis ===== */
+.premade-banner-icon { display: inline-flex; color: var(--accent-color); }
+
+.premade-flag {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border: 2px solid var(--accent-color);
+    border-radius: 10px;
+    color: var(--accent-color);
+    font-size: 1em;
+    font-weight: bold;
+    letter-spacing: 0.04em;
+    flex-shrink: 0;
+}
+
+.deck-current-label {
+    margin: 0 0 8px 0;
+    padding: 8px 12px;
+    border-radius: 6px;
+    background-color: color-mix(in srgb, var(--accent-color) 15%, var(--container-bg));
+    color: var(--accent-color);
+    font-weight: bold;
+    overflow-wrap: anywhere;
+}
+
+.deck-current-label.none {
+    background-color: var(--entry-bg);
+    color: var(--summary-color);
+    font-weight: normal;
+    font-style: italic;
+}
+
+
+.deck-item.is-open .deck-item-name::before {
+    content: "\2192\00a0";
+    color: var(--accent-color);
+    font-weight: bold;
+}
