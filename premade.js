@@ -1412,7 +1412,7 @@ serce|heart
 магазин|shop
 супермаркет|supermarket
 ресторан|restaurant
-готель|hotel
+hotel|hotel
 потяг|train
 автобус|bus
 пляж|beach
