@@ -53,6 +53,24 @@ const UI = (() => {
         render();
     }
 
+    function refreshCurrentCard() {
+        if (!currentDeck) {
+            updateState();
+            return;
+        }
+        if (Session.isComplete()) {
+            appState = 'SESSION_COMPLETE';
+            render();
+            return;
+        }
+        renderDeckStatus();
+        if (appState === 'SHOW_FRONT' || appState === 'SHOW_BACK') {
+            renderCard(appState === 'SHOW_BACK');
+        } else {
+            updateState();
+        }
+    }
+
     function render() {
         const noArea       = document.getElementById('no-deck-area');
         const sessionArea  = document.getElementById('session-area');
@@ -94,6 +112,9 @@ const UI = (() => {
         if (!card) return;
 
         const cardText         = document.getElementById('card-text');
+        const cardNotesDisplay = document.getElementById('card-notes-display');
+        const noteActionArea   = document.getElementById('note-action-area');
+        const btnNoteText      = document.getElementById('btn-session-note-text');
         const cardProgress     = document.getElementById('card-progress');
         const showAnswerArea   = document.getElementById('show-answer-area');
         const ratingSpaced     = document.getElementById('rating-spaced');
@@ -104,6 +125,31 @@ const UI = (() => {
         const questionSide = showTranslationFirst ? card.translation : card.word;
         const answerSide   = showTranslationFirst ? card.word : card.translation;
         cardText.textContent = showBack ? answerSide : questionSide;
+
+        // Notes display & note action button (only available after pressing show answer).
+        // When a note already exists, the note itself is clickable to edit — no separate "Edit Note" button needed.
+        if (showBack) {
+            if (card.notes && card.notes.trim()) {
+                if (cardNotesDisplay) {
+                    cardNotesDisplay.innerHTML = `<svg class="note-sil-icon" viewBox="0 0 16 16" width="13" height="13" fill="currentColor" aria-hidden="true"><path d="M3 1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V5.414a1 1 0 0 0-.293-.707l-3.414-3.414A1 1 0 0 0 9.586 1H3zm6 1.414L11.586 5H9V2.414zM4 3h4v3a1 1 0 0 0 1 1h3v7H4V3zm2 5a.5.5 0 0 0 0 1h4a.5.5 0 0 0 0-1H6zm0 2.5a.5.5 0 0 0 0 1h4a.5.5 0 0 0 0-1H6z"/></svg><span class="card-notes-label">Note:</span> <span class="card-notes-text">${card.notes.trim()}</span>`;
+                    cardNotesDisplay.classList.remove('hidden');
+                }
+                if (noteActionArea) noteActionArea.classList.add('hidden');
+            } else {
+                if (cardNotesDisplay) {
+                    cardNotesDisplay.innerHTML = '';
+                    cardNotesDisplay.classList.add('hidden');
+                }
+                if (btnNoteText) btnNoteText.textContent = '+ Add Note';
+                if (noteActionArea) noteActionArea.classList.remove('hidden');
+            }
+        } else {
+            if (cardNotesDisplay) {
+                cardNotesDisplay.innerHTML = '';
+                cardNotesDisplay.classList.add('hidden');
+            }
+            if (noteActionArea) noteActionArea.classList.add('hidden');
+        }
 
         // Progress indicator
         const progress = Session.getProgress();
@@ -295,8 +341,35 @@ const UI = (() => {
         document.getElementById('btn-good').addEventListener('click',  () => onRate('good'));
         document.getElementById('btn-easy').addEventListener('click',  () => onRate('easy'));
 
-        // Card click - copy text to clipboard
-        document.getElementById('card-display').addEventListener('click', () => {
+        // Session note button
+        const btnSessionNote = document.getElementById('btn-session-note');
+        if (btnSessionNote) {
+            btnSessionNote.addEventListener('click', () => {
+                const card = Session.getCurrentCard();
+                if (!card) return;
+                Dialogs.openQuickNoteModal(card, (savedNote) => {
+                    Config.saveDeck(currentDeck);
+                    renderCard(true);
+                    showMessage(savedNote ? 'Note saved.' : 'Note removed.', 'success', 2000);
+                });
+            });
+        }
+
+        // Card click - copy text to clipboard (unless clicking note)
+        const cardDisplay = document.getElementById('card-display');
+        cardDisplay.addEventListener('click', (e) => {
+            if (e.target.closest('#card-notes-display') || e.target.closest('#note-action-area')) {
+                // If clicked on note display, open note editor
+                const card = Session.getCurrentCard();
+                if (card && appState === 'SHOW_BACK') {
+                    Dialogs.openQuickNoteModal(card, (savedNote) => {
+                        Config.saveDeck(currentDeck);
+                        renderCard(true);
+                        showMessage(savedNote ? 'Note saved.' : 'Note removed.', 'success', 2000);
+                    });
+                }
+                return;
+            }
             if (!Session.getCurrentCard()) return;
             const text = document.getElementById('card-text').textContent;
             if (navigator.clipboard) {
@@ -330,6 +403,7 @@ const UI = (() => {
         getCurrentDeck,
         setCurrentDeck,
         updateState,
+        refreshCurrentCard,
         renderDeckStatus,
         showMessage,
         applyTheme

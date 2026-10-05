@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Web Flashcards by Mattias</title>
-    <meta name="description" content="A browser-based flashcard study app with spaced repetition, premade decks, custom deck management, and configuration backup." />
+    <meta name="description" content="A browser-based flashcard study app with spaced repetition, premade decks, custom deck management, card notes, and configuration backup." />
     <meta property="og:title" content="Web Flashcards by Mattias" />
-    <meta property="og:description" content="A browser-based flashcard study app with spaced repetition, premade decks, custom deck management, and configuration backup." />
+    <meta property="og:description" content="A browser-based flashcard study app with spaced repetition, premade decks, custom deck management, card notes, and configuration backup." />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="stylesheet" href="style.css">
@@ -50,6 +50,15 @@
 
             <div id="card-display" class="card-display" title="Click to copy text">
                 <div id="card-text" class="card-text"></div>
+                <div id="card-notes-display" class="card-notes-display hidden"></div>
+            </div>
+
+            <!-- Note action button (SHOW_BACK) -->
+            <div id="note-action-area" class="note-action-area hidden">
+                <button id="btn-session-note" class="note-toggle-btn" type="button">
+                    <svg class="note-sil-icon" viewBox="0 0 16 16" width="13" height="13" fill="currentColor" aria-hidden="true"><path d="M3 1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V5.414a1 1 0 0 0-.293-.707l-3.414-3.414A1 1 0 0 0 9.586 1H3zm6 1.414L11.586 5H9V2.414zM4 3h4v3a1 1 0 0 0 1 1h3v7H4V3zm2 5a.5.5 0 0 0 0 1h4a.5.5 0 0 0 0-1H6zm0 2.5a.5.5 0 0 0 0 1h4a.5.5 0 0 0 0-1H6z"/></svg>
+                    <span id="btn-session-note-text">+ Add Note</span>
+                </button>
             </div>
 
             <!-- Show Answer button (SHOW_FRONT) -->
@@ -162,7 +171,7 @@
         <div class="modal-content modal-small">
             <span class="close-button" data-modal="export-deck-modal">&times;</span>
             <h2>Export Deck</h2>
-            <p class="modal-subtitle"><strong>.json</strong> keeps your study progress (best for backups). <strong>.txt</strong> is just the words (works with Anki).</p>
+            <p class="modal-subtitle"><strong>.json</strong> keeps your study progress and notes (best for backups). <strong>.txt</strong> is just the words and notes (works with Anki).</p>
             <div class="modal-button-row">
                 <button id="btn-export-json" class="modal-action-button accent-button">Export .json</button>
                 <button id="btn-export-txt" class="modal-action-button">Export .txt</button>
@@ -248,6 +257,10 @@
                 <label for="card-translation-input">Translation / Back:</label>
                 <input type="text" id="card-translation-input" placeholder="e.g., Hello">
             </div>
+            <div class="form-group">
+                <label for="card-notes-input">Notes (optional):</label>
+                <textarea id="card-notes-input" placeholder="e.g., Usage context, grammar tip, or mnemonic" rows="3"></textarea>
+            </div>
             <div class="modal-button-row">
                 <button id="btn-card-save" class="modal-action-button accent-button">Save</button>
                 <button class="modal-action-button" data-modal="card-edit-modal">Cancel</button>
@@ -260,7 +273,7 @@
         <div class="modal-content">
             <span class="close-button" data-modal="import-cards-modal">&times;</span>
             <h2>Import Cards</h2>
-            <p class="modal-subtitle">Import from a <strong>.json</strong> deck file, a <strong>.txt</strong> file, or paste text below (<strong>Word - Translation</strong> or tab-separated).</p>
+            <p class="modal-subtitle">Import from a <strong>.json</strong> deck file, a <strong>.txt</strong> file, or paste text below (<strong>Word - Translation</strong> or <strong>Word - Translation - Notes</strong>, or tab-separated).</p>
             <div class="form-group">
                 <div class="import-file-row">
                     <button id="btn-import-json-file" class="modal-action-button">Choose .json File</button>
@@ -269,7 +282,7 @@
                 </div>
                 <input type="file" id="import-json-file-input" accept=".json" class="hidden-file-input">
                 <input type="file" id="import-txt-file-input" accept=".txt" class="hidden-file-input">
-                <textarea id="import-text-area" rows="10" placeholder="Cześć - Hello&#10;Dzień - Day&#10;Kot - Cat&#10;&#10;Or tab-separated (Anki export):&#10;Cześć&#9;Hello&#10;Dzień&#9;Day"></textarea>
+                <textarea id="import-text-area" rows="10" placeholder="Cześć - Hello - Informal greeting&#10;Dzień - Day&#10;Kot - Cat&#10;&#10;Or tab-separated (Anki export):&#10;Cześć&#9;Hello&#9;Informal greeting&#10;Dzień&#9;Day"></textarea>
             </div>
             <div class="modal-button-row">
                 <button id="btn-import-confirm" class="modal-action-button accent-button">Import Text</button>
@@ -317,7 +330,7 @@
                 <h3>About</h3>
                 <div class="info-section">
                     <strong>Web Flashcards by Mattias</strong>
-                    <p>A browser-based flashcard study app. Create decks, add cards, and study using spaced repetition - all from your browser with no server required.</p>
+                    <p>A browser-based flashcard study app. Create decks, add cards with optional notes, and study using spaced repetition - all from your browser with no server required.</p>
                 </div>
 
                 <h3>Features</h3>
@@ -329,6 +342,14 @@
                         <li><strong>Rename deck</strong> - select a deck in Manage Decks and click Rename to give it a new name.</li>
                         <li><strong>Import/Export</strong> - save decks as <code>.json</code> or <code>.txt</code> files and reload them later.</li>
                         <li><strong>Import from text</strong> - paste or load cards in "Word - Translation" or tab-separated (Anki export) format, one per line.</li>
+                    </ul>
+                </div>
+                <div class="info-section">
+                    <strong>Card Notes</strong>
+                    <ul class="info-list">
+                        <li><strong>Optional notes</strong> - add explanatory notes, mnemonics, or usage examples to any card in the Card Editor.</li>
+                        <li><strong>Revealed on answer</strong> - notes remain hidden when viewing the question and appear only after you press <em>Show Answer</em> during review.</li>
+                        <li><strong>Clean compatibility</strong> - notes are fully optional and supported in both JSON and text backups without altering existing deck saves.</li>
                     </ul>
                 </div>
                 <div class="info-section">
@@ -394,6 +415,24 @@
                 </div>
             </div>
             <button class="modal-close-button" data-modal="info-modal">Close</button>
+        </div>
+    </div>
+
+    <!-- Quick Note Modal (for adding/editing note during review) -->
+    <div id="quick-note-modal" class="modal hidden">
+        <div class="modal-content modal-small">
+            <span class="close-button" data-modal="quick-note-modal">&times;</span>
+            <h2 id="quick-note-title">Card Note</h2>
+            <div id="quick-note-card-text" class="quick-note-card-text"></div>
+            <div class="form-group">
+                <label for="quick-note-input">Note (optional):</label>
+                <textarea id="quick-note-input" rows="4" placeholder="e.g., Grammar tip, mnemonic, context..."></textarea>
+            </div>
+            <div class="modal-button-row">
+                <button id="btn-quick-note-save" class="modal-action-button accent-button">Save</button>
+                <button id="btn-quick-note-delete" class="modal-action-button danger-button hidden">Delete Note</button>
+                <button class="modal-action-button" data-modal="quick-note-modal">Cancel</button>
+            </div>
         </div>
     </div>
 

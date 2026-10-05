@@ -115,7 +115,11 @@ const Dialogs = (() => {
             if (e.key === 'Enter') document.getElementById('card-translation-input').focus();
         });
         document.getElementById('card-translation-input').addEventListener('keydown', e => {
-            if (e.key === 'Enter') saveCard();
+            if (e.key === 'Enter') {
+                const notesInput = document.getElementById('card-notes-input');
+                if (notesInput) notesInput.focus();
+                else saveCard();
+            }
         });
 
         // Import from text
@@ -152,8 +156,8 @@ const Dialogs = (() => {
         const deck = UI.getCurrentDeck();
         if (deck) {
             Config.saveDeck(deck);
-            Session.buildQueue(deck);
-            UI.updateState();
+            Session.syncDeck(deck);
+            UI.refreshCurrentCard();
         }
     }
 
@@ -314,7 +318,8 @@ const Dialogs = (() => {
             ? cards.filter(c => {
                 const term = filter.toLowerCase();
                 return c.word.toLowerCase().includes(term) ||
-                       c.translation.toLowerCase().includes(term);
+                       c.translation.toLowerCase().includes(term) ||
+                       (c.notes && c.notes.toLowerCase().includes(term));
               })
             : cards.slice();
 
@@ -335,13 +340,17 @@ const Dialogs = (() => {
             const row = document.createElement('div');
             row.className = 'card-row';
 
-            // Word - Translation
+            // Word - Translation (+ Note preview if present)
             const info = document.createElement('div');
             info.className = 'card-row-info';
-            info.innerHTML =
+            let infoHtml =
                 `<span class="card-word">${escHtml(card.word)}</span>` +
                 `<span class="card-sep"> - </span>` +
                 `<span class="card-translation">${escHtml(card.translation)}</span>`;
+            if (card.notes && card.notes.trim()) {
+                infoHtml += `<div class="card-notes-preview"><svg class="note-sil-icon" viewBox="0 0 16 16" width="12" height="12" fill="currentColor" aria-hidden="true"><path d="M3 1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V5.414a1 1 0 0 0-.293-.707l-3.414-3.414A1 1 0 0 0 9.586 1H3zm6 1.414L11.586 5H9V2.414zM4 3h4v3a1 1 0 0 0 1 1h3v7H4V3zm2 5a.5.5 0 0 0 0 1h4a.5.5 0 0 0 0-1H6zm0 2.5a.5.5 0 0 0 0 1h4a.5.5 0 0 0 0-1H6z"/></svg>${escHtml(card.notes.trim())}</div>`;
+            }
+            info.innerHTML = infoHtml;
 
             // Status badge
             const badge = document.createElement('span');
@@ -372,8 +381,8 @@ const Dialogs = (() => {
         });
     }
 
-    function newCard(word, translation) {
-        return {
+    function newCard(word, translation, notes = '') {
+        const card = {
             word,
             translation,
             sessionStatus: 'TO_REVIEW',
@@ -381,6 +390,10 @@ const Dialogs = (() => {
             interval:      1,
             easeFactor:    2.5
         };
+        if (notes && typeof notes === 'string' && notes.trim()) {
+            card.notes = notes.trim();
+        }
+        return card;
     }
 
     function openAddCard() {
@@ -388,6 +401,8 @@ const Dialogs = (() => {
         document.getElementById('card-edit-title').textContent = 'Add Card';
         document.getElementById('card-word-input').value = '';
         document.getElementById('card-translation-input').value = '';
+        const notesInput = document.getElementById('card-notes-input');
+        if (notesInput) notesInput.value = '';
         openModal('card-edit-modal');
         setTimeout(() => document.getElementById('card-word-input').focus(), 50);
     }
@@ -401,6 +416,8 @@ const Dialogs = (() => {
         document.getElementById('card-edit-title').textContent = 'Edit Card';
         document.getElementById('card-word-input').value = card.word;
         document.getElementById('card-translation-input').value = card.translation;
+        const notesInput = document.getElementById('card-notes-input');
+        if (notesInput) notesInput.value = card.notes || '';
         openModal('card-edit-modal');
         setTimeout(() => document.getElementById('card-word-input').focus(), 50);
     }
@@ -408,6 +425,8 @@ const Dialogs = (() => {
     function saveCard() {
         const word        = document.getElementById('card-word-input').value.trim();
         const translation = document.getElementById('card-translation-input').value.trim();
+        const notesInput  = document.getElementById('card-notes-input');
+        const notes       = notesInput ? notesInput.value.trim() : '';
 
         if (!word || !translation) {
             UI.showMessage('Please enter both a word and a translation.', 'error');
@@ -420,9 +439,14 @@ const Dialogs = (() => {
         if (editingCardIndex !== null) {
             deck.cards[editingCardIndex].word        = word;
             deck.cards[editingCardIndex].translation = translation;
+            if (notes) {
+                deck.cards[editingCardIndex].notes = notes;
+            } else {
+                delete deck.cards[editingCardIndex].notes;
+            }
             UI.showMessage('Card updated.', 'success', 2000);
         } else {
-            deck.cards.push(newCard(word, translation));
+            deck.cards.push(newCard(word, translation, notes));
             UI.showMessage('Card added.', 'success', 2000);
         }
 
@@ -507,7 +531,7 @@ const Dialogs = (() => {
                 if (isDuplicate) {
                     skipped++;
                 } else {
-                    deck.cards.push(newCard(importedCard.word, importedCard.translation));
+                    deck.cards.push(newCard(importedCard.word, importedCard.translation, importedCard.notes));
                     added++;
                 }
             });
@@ -538,7 +562,7 @@ const Dialogs = (() => {
             if (line.startsWith('#')) return; // Anki export comment/header lines
             const parsed = parseTxtLine(line);
             if (parsed) {
-                deck.cards.push(newCard(parsed.word, parsed.translation));
+                deck.cards.push(newCard(parsed.word, parsed.translation, parsed.notes));
                 added++;
             } else {
                 skipped++;
@@ -646,29 +670,90 @@ const Dialogs = (() => {
     }
 
     // ========================
+    // Quick Note Modal (during review)
+    // ========================
+
+    function openQuickNoteModal(card, onSave) {
+        if (!card) return;
+        const textDisplay = document.getElementById('quick-note-card-text');
+        if (textDisplay) {
+            textDisplay.textContent = `${card.word} - ${card.translation}`;
+        }
+        const input = document.getElementById('quick-note-input');
+        if (input) {
+            input.value = card.notes || '';
+        }
+        const delBtn = document.getElementById('btn-quick-note-delete');
+        if (delBtn) {
+            delBtn.classList.toggle('hidden', !card.notes);
+        }
+
+        const saveBtn = document.getElementById('btn-quick-note-save');
+        if (saveBtn) {
+            saveBtn.onclick = () => {
+                const newNote = input ? input.value.trim() : '';
+                if (newNote) {
+                    card.notes = newNote;
+                } else {
+                    delete card.notes;
+                }
+                closeModal('quick-note-modal');
+                if (typeof onSave === 'function') onSave(card.notes || '');
+            };
+        }
+
+        if (delBtn) {
+            delBtn.onclick = () => {
+                delete card.notes;
+                closeModal('quick-note-modal');
+                if (typeof onSave === 'function') onSave('');
+            };
+        }
+
+        openModal('quick-note-modal');
+        setTimeout(() => {
+            if (input) {
+                input.focus();
+                input.setSelectionRange(input.value.length, input.value.length);
+            }
+        }, 50);
+    }
+
+    // ========================
     // Utility
     // ========================
 
     /**
      * Parse a single line from a text import.
-     * Accepts tab-separated (Anki plain-text export: Front\tBack[\tTags...])
-     * and dash-separated (Word - Translation) formats.
-     * Returns { word, translation } or null if the line cannot be parsed.
+     * Accepts tab-separated (Anki plain-text export: Front\tBack[\tNotes/Tags...])
+     * and dash-separated (Word - Translation or Word - Translation - Notes) formats.
+     * Returns { word, translation, notes } or null if the line cannot be parsed.
      */
     function parseTxtLine(line) {
-        // Tab-separated: first two fields are front and back; any further fields (e.g. tags) are ignored
+        // Tab-separated: fields are front, back, and optional notes
         const tabIdx = line.indexOf('\t');
         if (tabIdx > 0) {
-            const word        = line.substring(0, tabIdx).trim();
-            const translation = line.substring(tabIdx + 1).split('\t')[0].trim();
-            if (word && translation) return { word, translation };
+            const parts = line.split('\t');
+            const word        = parts[0].trim();
+            const translation = parts[1] ? parts[1].trim() : '';
+            const notes       = parts[2] ? parts[2].trim() : '';
+            if (word && translation) return { word, translation, notes };
         }
-        // Dash-separated
+        // Dash-separated: "Word - Translation" or "Word - Translation - Notes"
         const dashIdx = line.indexOf(' - ');
         if (dashIdx > 0) {
-            const word        = line.substring(0, dashIdx).trim();
-            const translation = line.substring(dashIdx + 3).trim();
-            if (word && translation) return { word, translation };
+            const word = line.substring(0, dashIdx).trim();
+            const rest = line.substring(dashIdx + 3);
+            const secondDash = rest.indexOf(' - ');
+            let translation, notes;
+            if (secondDash > 0) {
+                translation = rest.substring(0, secondDash).trim();
+                notes = rest.substring(secondDash + 3).trim();
+            } else {
+                translation = rest.trim();
+                notes = '';
+            }
+            if (word && translation) return { word, translation, notes };
         }
         return null;
     }
@@ -696,6 +781,9 @@ const Dialogs = (() => {
 
         // Card editor
         openCardEditor,
+
+        // Quick Note
+        openQuickNoteModal,
 
         // Settings
         openSettings,

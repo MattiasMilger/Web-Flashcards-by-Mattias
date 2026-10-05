@@ -204,6 +204,33 @@ const Session = (() => {
         buildQueue(deck);
     }
 
+    /**
+     * Synchronize the current session queue after edits in the card editor,
+     * preserving the current card position without restarting or reshuffling.
+     */
+    function syncDeck(deck) {
+        if (!deck || !Array.isArray(deck.cards)) return;
+        if (queue.length === 0) {
+            buildQueue(deck);
+            return;
+        }
+
+        // Update cards in queue to match deck.cards
+        for (let i = 0; i < queue.length; i++) {
+            const match = deck.cards.find(c => c === queue[i] ||
+                (c.word === queue[i].word && c.translation === queue[i].translation));
+            if (match) {
+                queue[i] = match;
+            }
+        }
+
+        // Remove any cards that were deleted from deck.cards
+        queue = queue.filter(qCard => deck.cards.includes(qCard));
+        if (currentIndex >= queue.length && queue.length > 0) {
+            currentIndex = queue.length - 1;
+        }
+    }
+
     // ========================
     // Stats
     // ========================
@@ -220,6 +247,7 @@ const Session = (() => {
 
     return {
         buildQueue,
+        syncDeck,
         getCurrentCard,
         isComplete,
         getProgress,

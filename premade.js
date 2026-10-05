@@ -687,7 +687,7 @@ ieri|yesterday
 adesso|now
 sempre|always
 mai|never
-la famiglia|the family
+la família|the family
 la madre|the mother
 il padre|the father
 l'amico / l'amica|the friend
@@ -812,7 +812,7 @@ chiamare|to call
 arrivare|to arrive
 pensare|to think
 trovare|to find
-dormir|to sleep
+dormire|to sleep
 leggere|to read
 scrivere|to write
 ascoltare|to listen

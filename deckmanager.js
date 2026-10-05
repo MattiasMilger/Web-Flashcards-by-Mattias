@@ -264,7 +264,7 @@ const DeckManager = (() => {
             e.target.result.split('\n').filter(l => l.trim()).forEach(line => {
                 if (line.startsWith('#')) return; // Anki export comment/header lines
                 const parsed = Dialogs.parseTxtLine(line);
-                if (parsed) cards.push(Dialogs.newCard(parsed.word, parsed.translation));
+                if (parsed) cards.push(Dialogs.newCard(parsed.word, parsed.translation, parsed.notes));
                 else skipped++;
             });
 

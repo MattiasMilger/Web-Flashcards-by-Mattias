@@ -15,11 +15,12 @@ Open `index.html` in a modern browser. No build tools or dependencies required.
 - **Spaced Repetition** - SM-2 scheduling with Again / Hard / Good / Easy ratings.
 - **Premade Decks** - One-tap vocabulary decks for Spanish, French, German, Italian, Portuguese, Polish, Ukrainian, Japanese, Mandarin, Korean, Indonesian, Swedish and Turkish.
 - **Deck Management** - Create, open, rename, and delete multiple decks stored in your browser.
-- **Card Editor** - Add, edit, delete, and search cards within any deck.
-- **Import Deck (.txt)** - Create a deck from a `.txt` file. Accepts `Word - Translation` format and tab-separated (Anki export) format.
+- **Card Notes** - Add optional notes to cards (viewable and editable in Edit Cards, or displayed after pressing Show Answer when reviewing cards). Premade decks contain no notes. Easily reversible and non-destructive to existing configurations and saves.
+- **Card Editor** - Add, edit, delete, and search cards (including notes) within any deck.
+- **Import Deck (.txt)** - Create a deck from a `.txt` file. Accepts `Word - Translation`, `Word - Translation - Notes`, and tab-separated (Anki export) formats.
 - **Import/Export Decks** - Save decks as `.json` or `.txt` files and reload them at any time.
 - **Data Config** - Accessible from the bottom link:
-  - **Export Config**: Download a full JSON backup of all your decks and settings.
+  - **Export Config**: Download a full JSON backup of all your decks, cards, notes, and settings.
   - **Import Config**: Restore your entire deck library and settings from a JSON backup.
   - **Danger Zone (Reset Config)**: Restore defaults safely by requiring a typed `RESET` confirmation.
 - **Background Dismissal** - All modal menus and dialogs can be canceled and closed by clicking anywhere on the background overlay or pressing Escape.
@@ -51,12 +52,12 @@ Web Flashcards by Mattias/
 
 | Module | Purpose |
 |---|---|
-| `config.js` | App constants, config and deck persistence in `localStorage`, full backup export/import, reset, schema migration |
+| `config.js` | App constants, config and deck persistence in `localStorage`, full backup export/import, reset, schema migration, note normalization |
 | `session.js` | Queue building, SM-2 spaced repetition, card rating, rewind, stats |
 | `premade.js` | Premade decks (compact text data) and the builder that turns them into decks |
 | `deckmanager.js` | Manage Decks dialog: single-select deck list, premade browser, import/export |
-| `dialogs.js` | Card editor, add/edit cards, import cards, settings, data config dialogs, in-app confirms |
-| `ui.js` | Application state machine, card rendering, event wiring, keyboard shortcuts |
+| `dialogs.js` | Card editor, add/edit cards (with optional notes), import cards, settings, data config dialogs, in-app confirms |
+| `ui.js` | Application state machine, card and note rendering, event wiring, keyboard shortcuts |
 
 ## Spaced Repetition (SM-2)
 
@@ -67,6 +68,15 @@ Cards are scheduled based on your performance. Rate each card as:
 - **Easy** (7d+) - easy, long interval.
 
 The interval between reviews grows each time you rate a card as Good or Easy, following the SM-2 algorithm. New cards and cards that are due appear in each session, up to the daily limit.
+
+## Card Notes
+
+Cards support optional notes:
+- **Adding / Editing**: When adding or editing a card in **Edit Cards**, fill out the optional Notes field.
+- **Reviewing**: When studying, notes are kept hidden while looking at the front/question of the card. After pressing **Show Answer**, the note appears below the answer.
+- **Searchable**: Searching in Edit Cards filters by word, translation, and notes.
+- **Import / Export**: Notes are exported in `.json` backups and `.txt` files (`Word - Translation - Notes` or tab-separated `Front\tBack\tNotes`).
+- **Compatibility**: If a card has no note, no extra fields are added, preserving full backwards and forwards compatibility.
 
 ## Older Saves (Simple Mode Removed)
 
@@ -79,41 +89,41 @@ The app used to have a second, Simple mode (Remembered / Forgot). It has been re
 
 ## Premade Decks
 
-Open **Manage Decks** and tap **Browse Premade Decks**. Each deck is named `Language - English` (foreign word on the front). The default first-launch deck is a 200-card Spanish deck, and every premade deck has exactly 200 cards. Add more languages by adding an entry to `premade.js`.
+Open **Manage Decks** and tap **Browse Premade Decks**. Each deck is named `Language - English` (foreign word on the front). The default first-launch deck is a 200-card Spanish deck, and every premade deck has exactly 200 cards. Premade decks do not include notes by default. Add more languages by adding an entry to `premade.js`.
 
 ## Data Config & Backups
 
 At the bottom of the page, click **Data Config** to access:
-- **Export Config**: Exports all your decks, cards, review intervals, and preferences into a single timestamped JSON file.
+- **Export Config**: Exports all your decks, cards, notes, review intervals, and preferences into a single timestamped JSON file.
 - **Import Config**: Restore your full collection from a previously saved JSON configuration file.
 - **Danger Zone**: To reset all decks and settings to clean factory defaults, click **Reset Config** and type `RESET` to confirm.
 
 ## Importing Decks from a Text File
 
-You can create a deck from a plain `.txt` file without any manual card entry. Two formats are supported:
+You can create a deck from a plain `.txt` file without any manual card entry. Multiple formats are supported:
 
-**Dash-separated** (default format):
+**Dash-separated** (default format, with optional notes):
 ```
 Cześć - Hello
 Dzień - Day
-Kot - Cat
-Herbata - Tea
+Kot - Cat - Small domestic feline
+Herbata - Tea - Earl Grey or green
 ```
 
 **Tab-separated** (Anki plain-text export):
 ```
 Cześć	Hello
 Dzień	Day
-Kot	Cat
+Kot	Cat	Small domestic feline
 ```
 
-Anki decks can be exported via **File → Export → Notes in Plain Text (.txt)** inside Anki. Extra columns such as tags are ignored automatically, and comment lines beginning with `#` are skipped.
+Anki decks can be exported via **File → Export → Notes in Plain Text (.txt)** inside Anki. Comment lines beginning with `#` are skipped.
 
-Both formats can be mixed freely in the same file. Lines that cannot be parsed are skipped and reported in the confirmation message.
+Formats can be mixed freely in the same file. Lines that cannot be parsed are skipped and reported in the confirmation message.
 
 **How to import:**
 1. Open **Manage Decks**
-2. Click **Import from File…**
+2. Click **Import from File**
 3. Choose **.txt** and select your file
 
 The deck is created automatically, named after the filename (minus the `.txt` extension).
@@ -134,7 +144,7 @@ You can also add cards from a `.txt` file into an *existing* deck via **Edit Car
 ## Technical Notes
 
 - **No external dependencies** - pure vanilla HTML, CSS, and JavaScript.
-- **localStorage** - All decks and settings persist in the browser. Clearing browser data will erase your decks - export them via Data Config first.
+- **localStorage** - All decks, cards, and settings persist in the browser. Clearing browser data will erase your decks - export them via Data Config first.
 - **JSON format** - Deck files are compatible with the desktop *Flashcards by Mattias* Python app (with automatic field normalization on import).
 
 ## Browser Support

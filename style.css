@@ -228,12 +228,14 @@ h1 {
     background-color: var(--entry-bg);
     border: 1px solid var(--border-color);
     border-radius: 8px;
-    padding: 50px 30px;
+    padding: 40px 30px;
     margin: 0 0 18px 0;
     min-height: 180px;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
+    gap: 14px;
     cursor: pointer;
     transition: background-color 0.3s, border-color 0.3s, transform 0.1s;
     user-select: none;
@@ -253,6 +255,83 @@ h1 {
     color: var(--fg-color);
     line-height: 1.4;
     word-break: break-word;
+}
+
+.card-notes-display {
+    font-size: 0.95em;
+    color: var(--summary-color);
+    background-color: color-mix(in srgb, var(--accent-color) 8%, var(--entry-bg));
+    border: 1px dashed color-mix(in srgb, var(--accent-color) 40%, var(--border-color));
+    border-radius: 6px;
+    padding: 8px 14px;
+    max-width: 90%;
+    text-align: center;
+    line-height: 1.45;
+    word-break: break-word;
+    white-space: pre-wrap;
+    cursor: pointer;
+    transition: border-color 0.2s, background-color 0.2s;
+}
+
+.card-notes-display:hover {
+    border-color: var(--accent-color);
+    background-color: color-mix(in srgb, var(--accent-color) 14%, var(--entry-bg));
+}
+
+.card-notes-label {
+    font-weight: bold;
+    color: var(--accent-color);
+    margin-right: 4px;
+}
+
+.card-notes-text {
+    color: var(--fg-color);
+}
+
+.note-sil-icon {
+    display: inline-block;
+    vertical-align: -1px;
+    margin-right: 5px;
+    color: currentColor;
+}
+
+/* Note Action Area (SHOW_BACK) */
+.note-action-area {
+    display: flex;
+    justify-content: center;
+    margin: -8px 0 10px 0;
+}
+
+.note-toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: transparent;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    color: var(--summary-color);
+    padding: 6px 12px;
+    font-size: 0.85em;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.note-toggle-btn:hover {
+    background-color: var(--entry-bg);
+    color: var(--fg-color);
+    border-color: var(--accent-color);
+}
+
+.quick-note-card-text {
+    padding: 10px 12px;
+    background-color: var(--entry-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    margin-bottom: 14px;
+    font-weight: bold;
+    color: var(--headline-color);
+    text-align: center;
 }
 
 /* --- Button Areas --- */
@@ -658,7 +737,7 @@ body.dark-mode .message-area.success {
 
 .form-group textarea {
     resize: vertical;
-    min-height: 120px;
+    min-height: 70px;
 }
 
 .modal-button-row {
@@ -819,7 +898,6 @@ body.dark-mode .message-area.success {
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
-    white-space: nowrap;
 }
 
 .card-word {
@@ -834,6 +912,19 @@ body.dark-mode .message-area.success {
 
 .card-translation {
     color: var(--fg-color);
+}
+
+.card-notes-preview {
+    font-size: 0.82em;
+    color: var(--summary-color);
+    margin-top: 3px;
+    font-style: italic;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 4px;
 }
 
 .card-status-badge {

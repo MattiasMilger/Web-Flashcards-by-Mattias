@@ -64,7 +64,7 @@ const Config = (() => {
                 dueDate = addDays(today, 7 + (finishedCount++ % 14));
             }
 
-            return {
+            const normalizedCard = {
                 word: String(c.word != null ? c.word : ''),
                 translation: String(c.translation != null ? c.translation : ''),
                 sessionStatus: dueDate ? 'SPACED' : 'TO_REVIEW',
@@ -72,6 +72,12 @@ const Config = (() => {
                 interval,
                 easeFactor: Math.round(ease * 1000) / 1000
             };
+
+            if (c.notes && typeof c.notes === 'string' && c.notes.trim()) {
+                normalizedCard.notes = c.notes.trim();
+            }
+
+            return normalizedCard;
         }).filter(c => c.word || c.translation);
 
         const limit = parseInt(deck.dailyLimit != null ? deck.dailyLimit : deck.daily_limit, 10);
@@ -252,7 +258,12 @@ const Config = (() => {
     }
 
     function exportDeckTxt(deck) {
-        const lines = deck.cards.map(c => `${c.word} - ${c.translation}`).join('\n');
+        const lines = deck.cards.map(c => {
+            if (c.notes && c.notes.trim()) {
+                return `${c.word} - ${c.translation} - ${c.notes.trim()}`;
+            }
+            return `${c.word} - ${c.translation}`;
+        }).join('\n');
         downloadBlob(lines, 'text/plain', deck.name.replace(/[^a-z0-9_\-]/gi, '_') + '.txt');
     }
 
