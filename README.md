@@ -22,7 +22,7 @@ Open `index.html` in a modern browser. No build tools or dependencies required.
 - **Data Config** - Accessible from the bottom link:
   - **Export Config**: Download a full JSON backup of all your decks, cards, notes, and settings.
   - **Import Config**: Restore your entire deck library and settings from a JSON backup.
-  - **Danger Zone (Reset Config)**: Restore defaults safely by requiring a typed `RESET` confirmation.
+  - **Reset Config**: Restore defaults safely by requiring a typed `RESET` confirmation.
 - **Background Dismissal** - All modal menus and dialogs can be canceled and closed by clicking anywhere on the background overlay or pressing Escape.
 - **Zero Browser Popups** - Clean, responsive in-app modals handle card deletion, deck deletion, and resets without native browser `confirm()` or `alert()` popups.
 - **Daily Limit** - Configure how many cards to study per day. Extend when you want more.
@@ -96,7 +96,7 @@ Open **Manage Decks** and tap **Browse Premade Decks**. Each deck is named `Lang
 At the bottom of the page, click **Data Config** to access:
 - **Export Config**: Exports all your decks, cards, notes, review intervals, and preferences into a single timestamped JSON file.
 - **Import Config**: Restore your full collection from a previously saved JSON configuration file.
-- **Danger Zone**: To reset all decks and settings to clean factory defaults, click **Reset Config** and type `RESET` to confirm.
+- **Reset Config**: To reset all decks and settings to clean factory defaults, click **Reset Config** and type `RESET` to confirm.
 
 ## Importing Decks from a Text File
 
