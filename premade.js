@@ -812,7 +812,7 @@ chiamare|to call
 arrivare|to arrive
 pensare|to think
 trovare|to find
-dormire|to sleep
+dormir|to sleep
 leggere|to read
 scrivere|to write
 ascoltare|to listen

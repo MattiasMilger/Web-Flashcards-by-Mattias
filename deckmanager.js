@@ -112,7 +112,6 @@ const DeckManager = (() => {
 
     function updateButtons() {
         SELECTION_BUTTONS.forEach(id => { $(id).disabled = !selected; });
-
     }
 
     function requireSelection(verb) {
@@ -169,17 +168,24 @@ const DeckManager = (() => {
     function deleteSelected() {
         if (!requireSelection('delete')) return;
         const name = selected;
-        if (!confirm(`Delete deck "${name}"? This cannot be undone.`)) return;
+        // In-app confirm instead of browser popup
+        Dialogs.showConfirm({
+            title: 'Delete Deck?',
+            message: `Delete deck "${name}"? This cannot be undone.`,
+            confirmText: 'Delete Deck',
+            danger: true,
+            onConfirm: () => {
+                Config.deleteDeck(name);
+                selected = null;
+                refresh();
 
-        Config.deleteDeck(name);
-        selected = null;
-        refresh();
-
-        if (!Config.getConfig().currentDeckName) {
-            UI.setCurrentDeck(null);
-            UI.updateState();
-        }
-        UI.showMessage(`Deck "${name}" deleted.`, 'info');
+                if (!Config.getConfig().currentDeckName) {
+                    UI.setCurrentDeck(null);
+                    UI.updateState();
+                }
+                UI.showMessage(`Deck "${name}" deleted.`, 'info');
+            }
+        });
     }
 
     function exportSelected(asTxt) {

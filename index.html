@@ -4,7 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Web Flashcards by Mattias</title>
-    <link rel="stylesheet" href="style.css?v=3">
+    <meta name="description" content="A browser-based flashcard study app with spaced repetition, premade decks, custom deck management, and configuration backup." />
+    <meta property="og:title" content="Web Flashcards by Mattias" />
+    <meta property="og:description" content="A browser-based flashcard study app with spaced repetition, premade decks, custom deck management, and configuration backup." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="stylesheet" href="style.css">
 </head>
 <body class="dark-mode">
     <div class="container">
@@ -356,10 +361,11 @@
                     </ul>
                 </div>
                 <div class="info-section">
-                    <strong>Older decks</strong>
+                    <strong>Data Config</strong>
                     <ul class="info-list">
-                        <li>Decks saved with the former Simple mode are converted automatically.</li>
-                        <li>Cards you had marked Finished are rescheduled over the following 7–20 days.</li>
+                        <li><strong>Export Config</strong> - download a single full backup with all decks and settings.</li>
+                        <li><strong>Import Config</strong> - restore your entire collection from a JSON backup.</li>
+                        <li><strong>Reset Config</strong> - restore defaults with typed confirmation in the Danger Zone.</li>
                     </ul>
                 </div>
                 <div class="info-section">
@@ -391,15 +397,77 @@
         </div>
     </div>
 
+    <!-- Generic In-App Confirm Modal (No browser popup) -->
+    <div id="confirm-modal" class="modal hidden">
+        <div class="modal-content modal-small">
+            <span class="close-button" data-modal="confirm-modal">&times;</span>
+            <h2 id="confirm-modal-title">Confirm</h2>
+            <p id="confirm-modal-message" class="modal-subtitle" style="font-size: 1em; font-style: normal; margin: 15px 0 20px 0;"></p>
+            <div class="modal-button-row">
+                <button id="btn-confirm-action" class="modal-action-button danger-button">Confirm</button>
+                <button class="modal-action-button" data-modal="confirm-modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== Data Config Modal (Matching Screenshot 2) ===== -->
+    <div id="data-config-modal" class="modal hidden">
+        <div class="modal-content modal-small">
+            <span class="close-button" data-modal="data-config-modal">&times;</span>
+            <h2 class="data-config-title">Data Config</h2>
+            <p class="modal-subtitle"><em>Configuration auto-saves to your browser.</em></p>
+
+            <div class="modal-button-row">
+                <button id="btn-export-full-config" class="config-action-btn" style="flex: 1;">Export Config</button>
+                <button id="btn-import-full-config" class="config-action-btn" style="flex: 1;">Import Config</button>
+            </div>
+            <input type="file" id="full-config-file-input" accept=".json" class="hidden-file-input">
+
+            <hr class="danger-separator">
+
+            <div class="danger-zone-title">Danger Zone</div>
+
+            <button id="btn-open-reset-config" class="full-width-danger-btn">Reset Config</button>
+
+            <button class="modal-close-button modal-center-close-btn" data-modal="data-config-modal">Close</button>
+        </div>
+    </div>
+
+    <!-- ===== Reset Config Modal (Matching Screenshot 3) ===== -->
+    <div id="reset-config-modal" class="modal hidden">
+        <div class="modal-content modal-small">
+            <span class="close-button" data-modal="reset-config-modal">&times;</span>
+            <h2 class="reset-config-title">Reset Config?</h2>
+            <p class="modal-subtitle"><em>This permanently deletes every deck and setting stored in this browser and restores the defaults. This cannot be undone.</em></p>
+
+            <div class="reset-callout-box">
+                <span id="reset-deck-count-text">All decks and all settings will be permanently deleted, restoring the defaults.</span>
+            </div>
+
+            <label for="reset-confirm-input" class="reset-prompt-label">Type <strong>RESET</strong> to confirm:</label>
+            <input type="text" id="reset-confirm-input" placeholder="RESET" class="reset-confirm-input" autocomplete="off" spellcheck="false">
+
+            <div class="modal-button-row">
+                <button id="btn-erase-everything" class="modal-action-button danger-button" disabled>Erase Everything</button>
+                <button class="modal-action-button" data-modal="reset-config-modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+
     <footer>
         <p><a href="https://github.com/MattiasMilger/Web-Flashcards-by-Mattias" target="_blank" rel="noopener noreferrer">GitHub Repository</a></p>
     </footer>
 
-    <script src="premade.js?v=3"></script>
-    <script src="config.js?v=3"></script>
-    <script src="session.js?v=3"></script>
-    <script src="dialogs.js?v=3"></script>
-    <script src="deckmanager.js?v=3"></script>
-    <script src="ui.js?v=3"></script>
+    <!-- Bottom Data Config link (Matching Screenshot 1) -->
+    <div class="bottom-config-area">
+        <a href="#data-config" id="link-data-config" class="data-config-link">Data Config</a>
+    </div>
+
+    <script src="premade.js"></script>
+    <script src="config.js"></script>
+    <script src="session.js"></script>
+    <script src="dialogs.js"></script>
+    <script src="deckmanager.js"></script>
+    <script src="ui.js"></script>
 </body>
 </html>

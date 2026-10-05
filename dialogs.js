@@ -1,10 +1,11 @@
 /**
  * dialogs.js - Modal dialog management
- * Handles deck manager, card editor, card add/edit, import from text, and settings.
+ * Handles deck manager, card editor, card add/edit, import from text, settings, data config, and in-app confirms.
  */
 
 const Dialogs = (() => {
     let editingCardIndex = null; // null = adding, number = editing
+    let currentConfirmCallback = null;
 
     // ========================
     // Generic modal helpers
@@ -18,6 +19,9 @@ const Dialogs = (() => {
     function closeModal(id) {
         const el = document.getElementById(id);
         if (el) el.classList.add('hidden');
+        if (id === 'card-editor-modal') {
+            onCardEditorClose();
+        }
     }
 
     function initCloseButtons() {
@@ -30,19 +34,57 @@ const Dialogs = (() => {
         document.addEventListener('keydown', e => {
             if (e.key === 'Escape') {
                 document.querySelectorAll('.modal:not(.hidden)').forEach(m => {
-                    m.classList.add('hidden');
+                    closeModal(m.id);
                 });
             }
         });
 
-        // Click outside modal-content to close (except deck/card editor modals)
-        const noBackgroundClose = ['deck-manager-modal', 'card-editor-modal', 'rename-deck-modal'];
+        // Click outside modal-content to close ALL modals (no exceptions, responsive and cancelable)
         document.querySelectorAll('.modal').forEach(modal => {
-            if (noBackgroundClose.includes(modal.id)) return;
             modal.addEventListener('click', e => {
-                if (e.target === modal) modal.classList.add('hidden');
+                if (e.target === modal) {
+                    closeModal(modal.id);
+                }
             });
         });
+    }
+
+    // ========================
+    // In-App Confirm Dialog (Replaces browser popup confirm())
+    // ========================
+
+    function showConfirm({ title, message, confirmText = 'Confirm', danger = false, onConfirm }) {
+        const modal = document.getElementById('confirm-modal');
+        const titleEl = document.getElementById('confirm-modal-title');
+        const msgEl = document.getElementById('confirm-modal-message');
+        const confirmBtn = document.getElementById('btn-confirm-action');
+
+        if (!modal || !titleEl || !msgEl || !confirmBtn) {
+            if (onConfirm) onConfirm();
+            return;
+        }
+
+        titleEl.textContent = title || 'Confirm Action';
+        msgEl.textContent = message || 'Are you sure?';
+        confirmBtn.textContent = confirmText;
+
+        if (danger) {
+            confirmBtn.className = 'modal-action-button danger-button';
+        } else {
+            confirmBtn.className = 'modal-action-button accent-button';
+        }
+
+        currentConfirmCallback = onConfirm;
+        openModal('confirm-modal');
+    }
+
+    function handleConfirmAction() {
+        closeModal('confirm-modal');
+        if (typeof currentConfirmCallback === 'function') {
+            const cb = currentConfirmCallback;
+            currentConfirmCallback = null;
+            cb();
+        }
     }
 
     // ========================
@@ -50,6 +92,12 @@ const Dialogs = (() => {
     // ========================
 
     function initEventListeners() {
+        // Confirm dialog button
+        const confirmBtn = document.getElementById('btn-confirm-action');
+        if (confirmBtn) {
+            confirmBtn.addEventListener('click', handleConfirmAction);
+        }
+
         // Deck manager (see deckmanager.js)
         DeckManager.init();
 
@@ -90,6 +138,9 @@ const Dialogs = (() => {
         document.getElementById('btn-extend-confirm').addEventListener('click', extendSessionFromSettings);
         document.getElementById('btn-reset-cards').addEventListener('click', resetDeckCards);
 
+        // Data Config listeners
+        initDataConfigListeners();
+
         // Re-build session queue when card editor closes (cards may have changed)
         document.getElementById('card-editor-modal').querySelector('.modal-close-button')
             .addEventListener('click', onCardEditorClose);
@@ -104,6 +155,141 @@ const Dialogs = (() => {
             Session.buildQueue(deck);
             UI.updateState();
         }
+    }
+
+    // ========================
+    // Data Config Logic
+    // ========================
+
+    function openDataConfig() {
+        openModal('data-config-modal');
+    }
+
+    function openResetConfigModal() {
+        closeModal('data-config-modal');
+        const count = Config.getDeckNames().length;
+        const countText = document.getElementById('reset-deck-count-text');
+        if (countText) {
+            countText.textContent = `${count} deck${count !== 1 ? 's' : ''} and all settings will be permanently deleted, restoring the defaults.`;
+        }
+        const input = document.getElementById('reset-confirm-input');
+        if (input) {
+            input.value = '';
+        }
+        const eraseBtn = document.getElementById('btn-erase-everything');
+        if (eraseBtn) {
+            eraseBtn.disabled = true;
+        }
+        openModal('reset-config-modal');
+        setTimeout(() => {
+            if (input) input.focus();
+        }, 50);
+    }
+
+    function initDataConfigListeners() {
+        // Link to open Data Config at bottom
+        const link = document.getElementById('link-data-config');
+        if (link) {
+            link.addEventListener('click', e => {
+                e.preventDefault();
+                openDataConfig();
+            });
+        }
+
+        // Export full config
+        const btnExport = document.getElementById('btn-export-full-config');
+        if (btnExport) {
+            btnExport.addEventListener('click', () => {
+                Config.exportFullConfig();
+                UI.showMessage('Configuration backup exported.', 'success', 2500);
+            });
+        }
+
+        // Import full config
+        const btnImport = document.getElementById('btn-import-full-config');
+        const fileInput = document.getElementById('full-config-file-input');
+        if (btnImport && fileInput) {
+            btnImport.addEventListener('click', () => {
+                fileInput.value = '';
+                fileInput.click();
+            });
+            fileInput.addEventListener('change', handleImportFullConfigFile);
+        }
+
+        // Reset Config button in Data Config modal
+        const btnResetConfig = document.getElementById('btn-open-reset-config');
+        if (btnResetConfig) {
+            btnResetConfig.addEventListener('click', openResetConfigModal);
+        }
+
+        // Confirmation input validation for reset
+        const resetInput = document.getElementById('reset-confirm-input');
+        const eraseBtn = document.getElementById('btn-erase-everything');
+        if (resetInput && eraseBtn) {
+            resetInput.addEventListener('input', () => {
+                eraseBtn.disabled = (resetInput.value.trim() !== 'RESET');
+            });
+            resetInput.addEventListener('keydown', e => {
+                if (e.key === 'Enter' && !eraseBtn.disabled) {
+                    performResetAll();
+                }
+            });
+        }
+
+        // Erase everything button click
+        if (eraseBtn) {
+            eraseBtn.addEventListener('click', performResetAll);
+        }
+    }
+
+    function handleImportFullConfigFile(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = ev => {
+            try {
+                const parsed = JSON.parse(ev.target.result);
+                const res = Config.importFullConfig(parsed);
+                if (typeof res === 'string') {
+                    UI.showMessage(res, 'error');
+                    return;
+                }
+
+                closeModal('data-config-modal');
+                const cfg = Config.getConfig();
+                UI.applyTheme(cfg.theme);
+
+                if (cfg.currentDeckName && Config.loadDeck(cfg.currentDeckName)) {
+                    UI.openDeck(cfg.currentDeckName);
+                } else if (cfg.deckNames.length > 0) {
+                    UI.openDeck(cfg.deckNames[0]);
+                } else {
+                    UI.updateState();
+                }
+                DeckManager.refresh();
+                UI.showMessage(`Configuration imported (${res.count} deck(s)).`, 'success', 3500);
+            } catch (err) {
+                UI.showMessage('Failed to parse configuration file: ' + err.message, 'error');
+            }
+        };
+        reader.readAsText(file);
+    }
+
+    function performResetAll() {
+        Config.resetAllConfig();
+        closeModal('reset-config-modal');
+        closeModal('data-config-modal');
+
+        const cfg = Config.getConfig();
+        UI.applyTheme(cfg.theme);
+        if (cfg.currentDeckName && Config.loadDeck(cfg.currentDeckName)) {
+            UI.openDeck(cfg.currentDeckName);
+        } else {
+            UI.updateState();
+        }
+        DeckManager.refresh();
+        UI.showMessage('Configuration reset to defaults.', 'success', 3500);
     }
 
     // ========================
@@ -250,12 +436,19 @@ const Dialogs = (() => {
         if (!deck || idx < 0 || idx >= deck.cards.length) return;
 
         const card = deck.cards[idx];
-        if (!confirm(`Delete "${card.word} - ${card.translation}"?`)) return;
-
-        deck.cards.splice(idx, 1);
-        Config.saveDeck(deck);
-        renderCardList(deck.cards, document.getElementById('card-search').value.trim());
-        UI.showMessage('Card deleted.', 'info', 2000);
+        // Use in-app confirmation modal without browser popup
+        showConfirm({
+            title: 'Delete Card?',
+            message: `Are you sure you want to delete "${card.word} - ${card.translation}"?`,
+            confirmText: 'Delete',
+            danger: true,
+            onConfirm: () => {
+                deck.cards.splice(idx, 1);
+                Config.saveDeck(deck);
+                renderCardList(deck.cards, document.getElementById('card-search').value.trim());
+                UI.showMessage('Card deleted.', 'info', 2000);
+            }
+        });
     }
 
     // ========================
@@ -426,23 +619,30 @@ const Dialogs = (() => {
         const deck = UI.getCurrentDeck();
         if (!deck) return;
 
-        if (!confirm(`Reset all ${deck.cards.length} cards in "${deck.name}" back to "To Review"? This clears all progress and spaced repetition data.`)) return;
+        // Use in-app confirmation modal without browser popup
+        showConfirm({
+            title: 'Reset Cards to "To Review"?',
+            message: `Reset all ${deck.cards.length} cards in "${deck.name}" back to "To Review"? This clears all progress and spaced repetition data.`,
+            confirmText: 'Reset Cards',
+            danger: true,
+            onConfirm: () => {
+                deck.cards.forEach(card => {
+                    card.sessionStatus = 'TO_REVIEW';
+                    card.dueDate       = null;
+                    card.interval      = 1;
+                    card.easeFactor    = 2.5;
+                });
+                deck.cardsReviewedToday = 0;
+                deck.sessionExtension   = 0;
+                deck.lastSessionDate    = null;
 
-        deck.cards.forEach(card => {
-            card.sessionStatus = 'TO_REVIEW';
-            card.dueDate       = null;
-            card.interval      = 1;
-            card.easeFactor    = 2.5;
+                Config.saveDeck(deck);
+                Session.buildQueue(deck);
+                renderCardList(deck.cards, '');
+                UI.updateState();
+                UI.showMessage(`All cards in "${deck.name}" reset to "To Review".`, 'success');
+            }
         });
-        deck.cardsReviewedToday = 0;
-        deck.sessionExtension   = 0;
-        deck.lastSessionDate    = null;
-
-        Config.saveDeck(deck);
-        Session.buildQueue(deck);
-        renderCardList(deck.cards, '');
-        UI.updateState();
-        UI.showMessage(`All cards in "${deck.name}" reset to "To Review".`, 'success');
     }
 
     // ========================
@@ -484,6 +684,7 @@ const Dialogs = (() => {
         closeModal,
         initCloseButtons,
         initEventListeners,
+        showConfirm,
 
         // Deck manager (implemented in deckmanager.js)
         openDeckManager: () => DeckManager.open(),
@@ -497,6 +698,9 @@ const Dialogs = (() => {
         openCardEditor,
 
         // Settings
-        openSettings
+        openSettings,
+
+        // Data Config
+        openDataConfig
     };
 })();

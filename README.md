@@ -18,12 +18,18 @@ Open `index.html` in a modern browser. No build tools or dependencies required.
 - **Card Editor** - Add, edit, delete, and search cards within any deck.
 - **Import Deck (.txt)** - Create a deck from a `.txt` file. Accepts `Word - Translation` format and tab-separated (Anki export) format.
 - **Import/Export Decks** - Save decks as `.json` or `.txt` files and reload them at any time.
+- **Data Config** - Accessible from the bottom link:
+  - **Export Config**: Download a full JSON backup of all your decks and settings.
+  - **Import Config**: Restore your entire deck library and settings from a JSON backup.
+  - **Danger Zone (Reset Config)**: Restore defaults safely by requiring a typed `RESET` confirmation.
+- **Background Dismissal** - All modal menus and dialogs can be canceled and closed by clicking anywhere on the background overlay or pressing Escape.
+- **Zero Browser Popups** - Clean, responsive in-app modals handle card deletion, deck deletion, and resets without native browser `confirm()` or `alert()` popups.
 - **Daily Limit** - Configure how many cards to study per day. Extend when you want more.
 - **Undo Last Rating** - Rewind the last card rating if you made a mistake.
 - **Keyboard Shortcuts** - Space/Enter to show answer; 1–4 to rate cards.
 - **Click to Copy** - Click the card to copy its text to clipboard.
 - **Dark / Light Theme** - Toggle between dark and light modes (dark by default).
-- **Responsive Design** - Works on desktop and mobile devices.
+- **Responsive Design** - Works on desktop and mobile devices without layout shifts.
 - **Persistent Storage** - All data saved in your browser's `localStorage`.
 
 ## Project Structure
@@ -45,11 +51,11 @@ Web Flashcards by Mattias/
 
 | Module | Purpose |
 |---|---|
-| `config.js` | App constants, config and deck persistence in `localStorage`, deck schema migration, export/import |
+| `config.js` | App constants, config and deck persistence in `localStorage`, full backup export/import, reset, schema migration |
 | `session.js` | Queue building, SM-2 spaced repetition, card rating, rewind, stats |
 | `premade.js` | Premade decks (compact text data) and the builder that turns them into decks |
 | `deckmanager.js` | Manage Decks dialog: single-select deck list, premade browser, import/export |
-| `dialogs.js` | Card editor, add/edit cards, import cards, settings |
+| `dialogs.js` | Card editor, add/edit cards, import cards, settings, data config dialogs, in-app confirms |
 | `ui.js` | Application state machine, card rendering, event wiring, keyboard shortcuts |
 
 ## Spaced Repetition (SM-2)
@@ -74,6 +80,13 @@ The app used to have a second, Simple mode (Remembered / Forgot). It has been re
 ## Premade Decks
 
 Open **Manage Decks** and tap **Browse Premade Decks**. Each deck is named `Language - English` (foreign word on the front). The default first-launch deck is a 200-card Spanish deck, and every premade deck has exactly 200 cards. Add more languages by adding an entry to `premade.js`.
+
+## Data Config & Backups
+
+At the bottom of the page, click **Data Config** to access:
+- **Export Config**: Exports all your decks, cards, review intervals, and preferences into a single timestamped JSON file.
+- **Import Config**: Restore your full collection from a previously saved JSON configuration file.
+- **Danger Zone**: To reset all decks and settings to clean factory defaults, click **Reset Config** and type `RESET` to confirm.
 
 ## Importing Decks from a Text File
 
@@ -107,19 +120,6 @@ The deck is created automatically, named after the filename (minus the `.txt` ex
 
 You can also add cards from a `.txt` file into an *existing* deck via **Edit Cards → Import Cards**, which loads the file into a preview textarea before importing.
 
-## How It Works
-
-1. **Configuration** loads from `localStorage` on startup (older decks are migrated). Last-used deck is reopened automatically.
-2. **Session queue** is built from cards that are due (or not yet started), up to the daily limit.
-3. The app shows the **card front**. Click "Show Answer" or press Space to reveal the back.
-4. **Rate the card** using the buttons or keyboard shortcuts (1–4). The card is updated and saved immediately.
-5. **Undo** the last rating at any time with the "↩ Undo Last Rating" button.
-6. When the session ends, use **Study More Cards** to extend the session.
-
-## Renaming a Deck
-
-Select any deck in **Manage Decks** and click **Rename**. Enter the new name and press Enter or click Rename. The deck's cards and progress are preserved; the name is updated everywhere including the status bar if the deck is currently open.
-
 ## Keyboard Shortcuts
 
 | Key | Action |
@@ -129,12 +129,12 @@ Select any deck in **Manage Decks** and click **Rename**. Enter the new name and
 | 2 | Hard |
 | 3 | Good |
 | 4 | Easy |
-| Escape | Close modal |
+| Escape | Close any open modal |
 
 ## Technical Notes
 
 - **No external dependencies** - pure vanilla HTML, CSS, and JavaScript.
-- **localStorage** - All decks and settings persist in the browser. Clearing browser data will erase your decks - export them as JSON first.
+- **localStorage** - All decks and settings persist in the browser. Clearing browser data will erase your decks - export them via Data Config first.
 - **JSON format** - Deck files are compatible with the desktop *Flashcards by Mattias* Python app (with automatic field normalization on import).
 
 ## Browser Support
@@ -146,7 +146,3 @@ Works in all modern browsers (Chrome, Firefox, Edge, Safari). Requires JavaScrip
 **Developer**: Mattias Milger
 **Email**: mattias.r.milger@gmail.com
 **GitHub**: [MattiasMilger](https://github.com/MattiasMilger)
-
-## More Projects
-
-Check out more of my work at [mattiasmilger.github.io](https://mattiasmilger.github.io/)

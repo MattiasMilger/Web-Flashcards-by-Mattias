@@ -221,7 +221,7 @@ const UI = (() => {
 
     function handleKeyDown(e) {
         // Don't fire when focused on an input/textarea/select
-        const tag = document.activeElement.tagName;
+        const tag = document.activeElement ? document.activeElement.tagName : '';
         if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
 
         // Don't fire when a modal is open
@@ -312,12 +312,18 @@ const UI = (() => {
         // Load last-used deck
         if (cfg.currentDeckName && Config.loadDeck(cfg.currentDeckName)) {
             openDeck(cfg.currentDeckName);
+        } else if (cfg.deckNames && cfg.deckNames.length > 0) {
+            openDeck(cfg.deckNames[0]);
         } else {
             updateState();
         }
     }
 
-    document.addEventListener('DOMContentLoaded', init);
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
 
     return {
         openDeck,

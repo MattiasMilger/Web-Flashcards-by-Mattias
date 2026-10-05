@@ -272,6 +272,104 @@ const Config = (() => {
         return normalizeDeck(data);
     }
 
+    // ========================
+    // Full Data Config (Export, Import, Reset)
+    // ========================
+
+    function exportFullConfig() {
+        const allDecks = [];
+        (config.deckNames || []).forEach(name => {
+            const d = loadDeck(name);
+            if (d) allDecks.push(d);
+        });
+
+        const fullData = {
+            appName: 'Web Flashcards by Mattias',
+            version: SCHEMA_VERSION,
+            exportedAt: new Date().toISOString(),
+            config: {
+                currentDeckName: config.currentDeckName,
+                theme: config.theme,
+                deckNames: config.deckNames
+            },
+            decks: allDecks
+        };
+
+        const dateStr = todayStr();
+        downloadBlob(JSON.stringify(fullData, null, 2), 'application/json', `flashcards_config_backup_${dateStr}.json`);
+    }
+
+    function importFullConfig(data) {
+        if (!data || typeof data !== 'object') {
+            return 'Invalid backup file: not a JSON object.';
+        }
+
+        // Support both full wrapper format or legacy/direct formats
+        let incomingDecks = [];
+        let incomingConfig = null;
+
+        if (Array.isArray(data.decks)) {
+            incomingDecks = data.decks;
+            incomingConfig = data.config || {};
+        } else if (Array.isArray(data)) {
+            incomingDecks = data;
+        } else if (data.cards && data.name) {
+            // Single deck imported via config
+            incomingDecks = [data];
+        } else {
+            return 'No deck data found in this configuration file.';
+        }
+
+        let importedCount = 0;
+        incomingDecks.forEach(rawDeck => {
+            const validated = importDeck(rawDeck);
+            if (typeof validated !== 'string') {
+                saveDeck(validated);
+                importedCount++;
+            }
+        });
+
+        if (importedCount === 0) {
+            return 'No valid decks could be imported from this file.';
+        }
+
+        if (incomingConfig) {
+            if (incomingConfig.theme) config.theme = incomingConfig.theme;
+            if (incomingConfig.currentDeckName && config.deckNames.includes(incomingConfig.currentDeckName)) {
+                config.currentDeckName = incomingConfig.currentDeckName;
+            } else if (!config.currentDeckName && config.deckNames.length > 0) {
+                config.currentDeckName = config.deckNames[0];
+            }
+            save();
+        }
+
+        return { success: true, count: importedCount };
+    }
+
+    function resetAllConfig() {
+        // Clear all flashcards_deck_ keys from localStorage
+        const keysToRemove = [];
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && (key.startsWith(DECK_PREFIX) || key === CONFIG_KEY)) {
+                keysToRemove.push(key);
+            }
+        }
+        keysToRemove.forEach(k => localStorage.removeItem(k));
+
+        // Re-initialize clean config
+        config = {
+            currentDeckName: null,
+            theme: 'dark',
+            deckNames: []
+        };
+        const example = createExampleDeck();
+        saveDeck(example);
+        config.currentDeckName = example.name;
+        save();
+        return true;
+    }
+
     return {
         DEFAULT_DAILY_LIMIT,
         load,
@@ -285,6 +383,9 @@ const Config = (() => {
         createEmptyDeck,
         exportDeckTxt,
         exportDeck,
-        importDeck
+        importDeck,
+        exportFullConfig,
+        importFullConfig,
+        resetAllConfig
     };
 })();
