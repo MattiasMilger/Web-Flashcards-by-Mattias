@@ -33,9 +33,16 @@ const Dialogs = (() => {
         // Escape key closes any open modal
         document.addEventListener('keydown', e => {
             if (e.key === 'Escape') {
-                document.querySelectorAll('.modal:not(.hidden)').forEach(m => {
-                    closeModal(m.id);
+                const open = Array.from(document.querySelectorAll('.modal:not(.hidden)'));
+                if (open.length === 0) return;
+                // Topmost = highest z-index, then latest in the page
+                let top = open[0];
+                open.forEach(m => {
+                    const z = parseInt(getComputedStyle(m).zIndex, 10) || 0;
+                    const tz = parseInt(getComputedStyle(top).zIndex, 10) || 0;
+                    if (z >= tz) top = m;
                 });
+                closeModal(top.id);
             }
         });
 
@@ -170,7 +177,6 @@ const Dialogs = (() => {
     }
 
     function openResetConfigModal() {
-        closeModal('data-config-modal');
         const count = Config.getDeckNames().length;
         const countText = document.getElementById('reset-deck-count-text');
         if (countText) {
@@ -214,8 +220,16 @@ const Dialogs = (() => {
         const fileInput = document.getElementById('full-config-file-input');
         if (btnImport && fileInput) {
             btnImport.addEventListener('click', () => {
-                fileInput.value = '';
-                fileInput.click();
+                showConfirm({
+                    title: 'Import Config?',
+                    message: 'Importing a config overwrites any of your decks that have the same name as a deck in the file, and replaces your current settings. Export your config first if you want a backup.',
+                    confirmText: 'Choose File',
+                    danger: true,
+                    onConfirm: () => {
+                        fileInput.value = '';
+                        fileInput.click();
+                    }
+                });
             });
             fileInput.addEventListener('change', handleImportFullConfigFile);
         }

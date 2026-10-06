@@ -21,7 +21,7 @@ Open `index.html` in a modern browser. No build tools or dependencies required.
 - **Import/Export Decks** - Save decks as `.json` or `.txt` files and reload them at any time.
 - **Data Config** - Accessible from the bottom link:
   - **Export Config**: Download a full JSON backup of all your decks, cards, notes, and settings.
-  - **Import Config**: Restore your entire deck library and settings from a JSON backup.
+  - **Import Config**: Restore your deck library and settings from a JSON backup. Sits under the red line next to Reset Config and asks for in-app confirmation before the file picker opens.
   - **Reset Config**: Restore defaults safely by requiring a typed `RESET` confirmation.
 - **Background Dismissal** - All modal menus and dialogs can be canceled and closed by clicking anywhere on the background overlay or pressing Escape.
 - **Zero Browser Popups** - Clean, responsive in-app modals handle card deletion, deck deletion, and resets without native browser `confirm()` or `alert()` popups.
@@ -95,7 +95,7 @@ Open **Manage Decks** and tap **Browse Premade Decks**. Each deck is named `Lang
 
 At the bottom of the page, click **Data Config** to access:
 - **Export Config**: Exports all your decks, cards, notes, review intervals, and preferences into a single timestamped JSON file.
-- **Import Config**: Restore your full collection from a previously saved JSON configuration file.
+- **Import Config**: Restore your full collection from a previously saved JSON configuration file. You are asked to confirm (in-app) before choosing a file.
 - **Reset Config**: To reset all decks and settings to clean factory defaults, click **Reset Config** and type `RESET` to confirm.
 
 ## Importing Decks from a Text File

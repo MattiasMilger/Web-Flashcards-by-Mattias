@@ -568,6 +568,12 @@ body.dark-mode .message-area.success {
     to { opacity: 1; }
 }
 
+/* Dialogs opened from Data Config must always stack above it */
+#confirm-modal,
+#reset-config-modal {
+    z-index: 1050;
+}
+
 .modal.hidden {
     display: none !important;
 }
