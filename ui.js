@@ -117,7 +117,7 @@ const UI = (() => {
         const btnNoteText      = document.getElementById('btn-session-note-text');
         const cardProgress     = document.getElementById('card-progress');
         const showAnswerArea   = document.getElementById('show-answer-area');
-        const ratingSpaced     = document.getElementById('rating-spaced');
+        const ratingButtons    = document.getElementById('rating-buttons');
         const btnBackToFront   = document.getElementById('btn-back-to-front');
         const btnRewind        = document.getElementById('btn-rewind');
 
@@ -158,12 +158,12 @@ const UI = (() => {
         // Show Answer vs rating buttons
         if (!showBack) {
             showAnswerArea.classList.remove('hidden');
-            ratingSpaced.classList.add('hidden');
+            ratingButtons.classList.add('hidden');
             btnBackToFront.classList.add('hidden');
         } else {
             showAnswerArea.classList.add('hidden');
             btnBackToFront.classList.remove('hidden');
-            ratingSpaced.classList.remove('hidden');
+            ratingButtons.classList.remove('hidden');
         }
 
         // Rewind button

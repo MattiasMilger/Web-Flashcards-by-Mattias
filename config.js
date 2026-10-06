@@ -7,8 +7,8 @@ const Config = (() => {
     const CONFIG_KEY = 'flashcards_config';
     const DECK_PREFIX = 'flashcards_deck_';
 
-    const DEFAULT_DAILY_LIMIT = 5;
-    const SCHEMA_VERSION = 2; // 2 = spaced repetition only
+    const DEFAULT_DAILY_LIMIT = 10;
+    const SCHEMA_VERSION = 2; // Current save format; older saves are upgraded once on load
 
     let config = {
         currentDeckName: null,
@@ -40,8 +40,8 @@ const Config = (() => {
     }
 
     /**
-     * Bring any deck (old Simple-mode save, Python-app export, partial data)
-     * up to the current schema. Mutates and returns the deck.
+     * Bring any deck (older save, Python-app export, partial data)
+     * up to the current format. Mutates and returns the deck.
      */
     function normalizeDeck(deck) {
         const today = todayStr();
@@ -57,7 +57,7 @@ const Config = (() => {
             let ease = Number(c.easeFactor != null ? c.easeFactor : c.ease_factor);
             if (!(ease >= 1.3)) ease = 2.5;
 
-            // Simple-mode "Finished" cards: schedule them instead of resurfacing as new
+            // Legacy "Finished" cards: schedule them instead of resurfacing as new
             const status = c.sessionStatus || c.session_status;
             if (status === 'FINISHED' && !dueDate) {
                 interval = Math.max(interval, 7);
@@ -82,7 +82,7 @@ const Config = (() => {
 
         const limit = parseInt(deck.dailyLimit != null ? deck.dailyLimit : deck.daily_limit, 10);
         deck.dailyLimit = limit >= 1 ? Math.min(500, limit) : DEFAULT_DAILY_LIMIT;
-        deck.learningMode = 'spaced'; // pinned; Simple mode no longer exists
+        deck.learningMode = 'spaced'; // always 'spaced'; kept in saves for compatibility
         deck.accumulateDailyLimit = !!deck.accumulateDailyLimit;
         const last = deck.lastSessionDate || deck.last_session_date;
         deck.lastSessionDate = isValidDate(last) ? last : null;

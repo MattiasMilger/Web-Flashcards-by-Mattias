@@ -78,14 +78,14 @@ Cards support optional notes:
 - **Import / Export**: Notes are exported in `.json` backups and `.txt` files (`Word - Translation - Notes` or tab-separated `Front\tBack\tNotes`).
 - **Compatibility**: If a card has no note, no extra fields are added, preserving full backwards and forwards compatibility.
 
-## Older Saves (Simple Mode Removed)
+## Older Saves
 
-The app used to have a second, Simple mode (Remembered / Forgot). It has been removed. Decks saved by earlier versions are converted automatically the first time the app loads, and the same conversion is applied to imported `.json` decks:
+Decks saved by earlier versions (which had a Remembered / Forgot mode) are converted automatically the first time the app loads, and the same conversion is applied to imported `.json` decks:
 
 - Cards you had marked **Finished** are scheduled for review 7–20 days from the day of conversion (spread out so they don't all come due at once).
 - All other cards keep their spaced-repetition progress, or start as new cards if they had none.
 - Invalid or missing fields (dates, intervals, ease factors, counters, limits) are repaired, and snake_case exports from the desktop Python app are accepted.
-- Converted decks carry `schemaVersion: 2`. `learningMode` is kept as `"spaced"` in the data for compatibility.
+- Converted decks carry `schemaVersion: 2`, and `learningMode` stays `"spaced"` in the data for compatibility.
 
 ## Premade Decks
 
