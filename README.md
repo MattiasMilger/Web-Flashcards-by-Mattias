@@ -25,7 +25,7 @@ Open `index.html` in a modern browser. No build tools or dependencies required.
   - **Reset Config**: Restore defaults safely by requiring a typed `RESET` confirmation.
 - **Background Dismissal** - All modal menus and dialogs can be canceled and closed by clicking anywhere on the background overlay or pressing Escape.
 - **Zero Browser Popups** - Clean, responsive in-app modals handle card deletion, deck deletion, and resets without native browser `confirm()` or `alert()` popups.
-- **Daily Limit** - Configure how many cards to study per day. Extend when you want more.
+- **Daily Goal** - Configure how many cards to study per day. Extend when you want more.
 - **Undo Last Rating** - Rewind the last card rating if you made a mistake.
 - **Keyboard Shortcuts** - Space/Enter to show answer; 1–4 to rate cards.
 - **Click to Copy** - Click the card to copy its text to clipboard.
@@ -67,7 +67,7 @@ Cards are scheduled based on your performance. Rate each card as:
 - **Good** (3–7d) - normal, standard interval.
 - **Easy** (7d+) - easy, long interval.
 
-The interval between reviews grows each time you rate a card as Good or Easy, following the SM-2 algorithm. New cards and cards that are due appear in each session, up to the daily limit.
+The interval between reviews grows each time you rate a card as Good or Easy, following the SM-2 algorithm. New cards and cards that are due appear in each session, up to the daily goal.
 
 ## Card Notes
 

@@ -201,7 +201,7 @@ const UI = (() => {
         title.textContent = 'Session Complete!';
         subtitle.textContent = stats.due === 0
             ? `No more cards due today. ${stats.upcoming} card(s) coming up later.`
-            : 'Daily limit reached.';
+            : 'Daily goal reached.';
     }
 
     // ========================
