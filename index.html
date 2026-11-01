@@ -99,7 +99,14 @@
                 <h3 id="complete-title">Session Complete!</h3>
                 <p id="complete-subtitle"></p>
                 <div class="extend-session-row">
-                    <input type="number" id="extend-amount-main" value="5" min="1" max="100" class="extend-input">
+                    <div class="amount-picker">
+                        <input type="range" class="amount-slider" min="1" max="50" value="5" aria-label="Number of extra cards">
+                        <div class="amount-stepper">
+                            <button type="button" class="step-btn" data-step="-1" aria-label="Decrease">&minus;</button>
+                            <input type="number" id="extend-amount-main" class="amount-input" value="5" min="1" max="100" inputmode="numeric">
+                            <button type="button" class="step-btn" data-step="1" aria-label="Increase">+</button>
+                        </div>
+                    </div>
                     <button id="btn-extend-session-main" class="control-button accent-button">Study More Cards</button>
                 </div>
                 <div class="button-area rewind-row">
@@ -310,7 +317,14 @@
             <div class="form-group" id="extend-session-group">
                 <label>Add Extra Cards Today:</label>
                 <div class="extend-inline">
-                    <input type="number" id="extend-amount" min="1" max="500" value="5" class="extend-input-small">
+                    <div class="amount-picker">
+                        <input type="range" class="amount-slider" min="1" max="50" value="5" aria-label="Number of extra cards">
+                        <div class="amount-stepper">
+                            <button type="button" class="step-btn" data-step="-1" aria-label="Decrease">&minus;</button>
+                            <input type="number" id="extend-amount" class="amount-input" value="5" min="1" max="500" inputmode="numeric">
+                            <button type="button" class="step-btn" data-step="1" aria-label="Increase">+</button>
+                        </div>
+                    </div>
                     <button id="btn-extend-confirm" class="modal-action-button accent-button">Extend Session</button>
                 </div>
             </div>

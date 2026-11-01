@@ -313,10 +313,58 @@ const UI = (() => {
     // Initialization
     // ========================
 
+    /**
+     * Wire up every slider + stepper amount picker (Study More / Extend Session).
+     * The number input stays the single source of truth; the slider mirrors it.
+     */
+    function initAmountPickers() {
+        document.querySelectorAll('.amount-picker').forEach(picker => {
+            const slider = picker.querySelector('.amount-slider');
+            const input  = picker.querySelector('.amount-input');
+            const min = parseInt(input.min, 10) || 1;
+            const max = parseInt(input.max, 10) || 100;
+
+            const clamp = n => Math.min(max, Math.max(min, n));
+
+            function paintSlider() {
+                const v = parseInt(input.value, 10);
+                if (isNaN(v)) return;
+                const s = Math.min(v, +slider.max);
+                slider.value = s;
+                const pct = ((s - slider.min) / (slider.max - slider.min)) * 100;
+                slider.style.setProperty('--fill', pct + '%');
+            }
+
+            slider.addEventListener('input', () => {
+                input.value = slider.value;
+                paintSlider();
+            });
+
+            picker.querySelectorAll('.step-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const cur = parseInt(input.value, 10);
+                    input.value = clamp((isNaN(cur) ? min : cur) + parseInt(btn.dataset.step, 10));
+                    paintSlider();
+                });
+            });
+
+            input.addEventListener('input', paintSlider);
+            input.addEventListener('change', () => {
+                const v = parseInt(input.value, 10);
+                input.value = clamp(isNaN(v) ? min : v);
+                paintSlider();
+            });
+
+            paintSlider();
+        });
+    }
+
     function init() {
         Config.load();
         const cfg = Config.getConfig();
         applyTheme(cfg.theme);
+
+        initAmountPickers();
 
         Dialogs.initCloseButtons();
         Dialogs.initEventListeners();

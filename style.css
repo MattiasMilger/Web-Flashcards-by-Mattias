@@ -467,21 +467,9 @@ h1 {
 
 .extend-session-row {
     display: flex;
-    gap: 10px;
-    justify-content: center;
+    flex-direction: column;
+    gap: 16px;
     align-items: center;
-    flex-wrap: wrap;
-}
-
-.extend-input {
-    width: 70px;
-    padding: 8px 10px;
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    font-size: 1em;
-    background-color: var(--entry-bg);
-    color: var(--fg-color);
-    text-align: center;
 }
 
 /* --- Message Area --- */
@@ -838,21 +826,140 @@ body.dark-mode .message-area.success {
 /* --- Extend Inline (settings) --- */
 .extend-inline {
     display: flex;
-    gap: 8px;
-    align-items: center;
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
     margin-top: 5px;
 }
 
-.extend-input-small {
-    width: 70px;
-    padding: 8px 10px;
+/* --- Amount Picker (slider + stepper) --- */
+.amount-picker {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+    max-width: 360px;
+}
+
+.amount-slider {
+    --fill: 0%;
+    -webkit-appearance: none;
+    appearance: none;
+    flex: 1;
+    min-width: 0;
+    height: 28px;              /* generous touch area; the visible track is thinner */
+    margin: 0;
+    background: transparent;
+    cursor: pointer;
+    outline: none;
+}
+
+.amount-slider::-webkit-slider-runnable-track {
+    height: 6px;
+    border-radius: 3px;
     border: 1px solid var(--border-color);
-    border-radius: 4px;
-    font-size: 0.9em;
+    background: linear-gradient(to right,
+        var(--accent-color) var(--fill), var(--entry-bg) var(--fill));
+}
+
+.amount-slider::-moz-range-track {
+    height: 6px;
+    border-radius: 3px;
+    border: 1px solid var(--border-color);
+    background: linear-gradient(to right,
+        var(--accent-color) var(--fill), var(--entry-bg) var(--fill));
+}
+
+.amount-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    margin-top: -7px;          /* centre on the 6px track (+2px border) */
+    border: none;
+    border-radius: 50%;
+    background: var(--accent-color);
+    box-shadow: 0 1px 4px var(--shadow-color);
+    transition: transform 0.15s;
+}
+
+.amount-slider::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border: none;
+    border-radius: 50%;
+    background: var(--accent-color);
+    box-shadow: 0 1px 4px var(--shadow-color);
+    transition: transform 0.15s;
+}
+
+.amount-slider:hover::-webkit-slider-thumb,
+.amount-slider:active::-webkit-slider-thumb { transform: scale(1.15); }
+.amount-slider:hover::-moz-range-thumb,
+.amount-slider:active::-moz-range-thumb { transform: scale(1.15); }
+
+.amount-slider:focus-visible::-webkit-slider-thumb {
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent-color) 35%, transparent);
+}
+.amount-slider:focus-visible::-moz-range-thumb {
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent-color) 35%, transparent);
+}
+
+.amount-stepper {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.amount-picker .step-btn {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background-color: var(--button-bg);
+    color: var(--fg-color);
+    font-size: 1.2em;
+    font-weight: bold;
+    line-height: 1;
+    cursor: pointer;
+    user-select: none;
+    touch-action: manipulation;
+    transition: background-color 0.2s;
+}
+
+.amount-picker .step-btn:hover { background-color: var(--select-bg); }
+.amount-picker .step-btn:active { transform: scale(0.95); }
+
+.amount-picker input.amount-input[type="number"] {
+    width: 56px;
+    height: 36px;
+    padding: 0;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
     background-color: var(--entry-bg);
     color: var(--fg-color);
+    font-family: inherit;
+    font-size: 1.05em;
+    font-weight: bold;
     text-align: center;
+    -moz-appearance: textfield;
+    appearance: textfield;
 }
+
+.amount-picker input.amount-input[type="number"]::-webkit-outer-spin-button,
+.amount-picker input.amount-input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.amount-picker input.amount-input[type="number"]:focus {
+    outline: none;
+    border-color: var(--accent-color);
+}
+
+.complete-message .amount-picker { margin: 0 auto; }
 
 /* --- Card Editor --- */
 .editor-toolbar {
