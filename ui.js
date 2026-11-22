@@ -14,6 +14,7 @@ const UI = (() => {
     let appState = 'NO_DECK';
     let showTranslationFirst = false;
     let rewindTranslationFirst = false; // tracks which face was shown for the last rated card
+    let messageTimer = null;
 
     // ========================
     // Deck loading
@@ -131,7 +132,8 @@ const UI = (() => {
         if (showBack) {
             if (card.notes && card.notes.trim()) {
                 if (cardNotesDisplay) {
-                    cardNotesDisplay.innerHTML = `<svg class="note-sil-icon" viewBox="0 0 16 16" width="13" height="13" fill="currentColor" aria-hidden="true"><path d="M3 1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V5.414a1 1 0 0 0-.293-.707l-3.414-3.414A1 1 0 0 0 9.586 1H3zm6 1.414L11.586 5H9V2.414zM4 3h4v3a1 1 0 0 0 1 1h3v7H4V3zm2 5a.5.5 0 0 0 0 1h4a.5.5 0 0 0 0-1H6zm0 2.5a.5.5 0 0 0 0 1h4a.5.5 0 0 0 0-1H6z"/></svg><span class="card-notes-label">Note:</span> <span class="card-notes-text">${card.notes.trim()}</span>`;
+                    cardNotesDisplay.innerHTML = `<svg class="note-sil-icon" viewBox="0 0 16 16" width="13" height="13" fill="currentColor" aria-hidden="true"><path d="M3 1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V5.414a1 1 0 0 0-.293-.707l-3.414-3.414A1 1 0 0 0 9.586 1H3zm6 1.414L11.586 5H9V2.414zM4 3h4v3a1 1 0 0 0 1 1h3v7H4V3zm2 5a.5.5 0 0 0 0 1h4a.5.5 0 0 0 0-1H6zm0 2.5a.5.5 0 0 0 0 1h4a.5.5 0 0 0 0-1H6z"/></svg><span class="card-notes-label">Note:</span> <span class="card-notes-text"></span>`;
+                    cardNotesDisplay.querySelector('.card-notes-text').textContent = card.notes.trim();
                     cardNotesDisplay.classList.remove('hidden');
                 }
                 if (noteActionArea) noteActionArea.classList.add('hidden');
@@ -164,6 +166,11 @@ const UI = (() => {
             showAnswerArea.classList.add('hidden');
             btnBackToFront.classList.remove('hidden');
             ratingButtons.classList.remove('hidden');
+            // Show exactly when each rating will bring the card back
+            ['again', 'hard', 'good', 'easy'].forEach(r => {
+                const sub = document.querySelector(`#btn-${r} .button-sub`);
+                if (sub) sub.textContent = Session.previewLabel(card, r);
+            });
         }
 
         // Rewind button
@@ -304,8 +311,9 @@ const UI = (() => {
         area.textContent = text;
         area.classList.remove('hidden');
 
+        clearTimeout(messageTimer);
         if (duration > 0) {
-            setTimeout(() => area.classList.add('hidden'), duration);
+            messageTimer = setTimeout(() => area.classList.add('hidden'), duration);
         }
     }
 

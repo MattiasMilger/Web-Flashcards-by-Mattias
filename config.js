@@ -20,14 +20,27 @@ const Config = (() => {
     // Date / migration helpers
     // ========================
 
+    function localDateStr(d) {
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${y}-${m}-${day}`;
+    }
+
     function todayStr() {
-        return new Date().toISOString().split('T')[0];
+        return localDateStr(new Date());
     }
 
     function addDays(dateStr, days) {
         const d = new Date(dateStr + 'T12:00:00');
         d.setDate(d.getDate() + days);
-        return d.toISOString().split('T')[0];
+        return localDateStr(d);
+    }
+
+    function warnSaveFailed() {
+        if (typeof UI !== 'undefined' && UI.showMessage) {
+            UI.showMessage('Could not save: your browser storage may be full. Export your decks as a backup.', 'error', 8000);
+        }
     }
 
     function isValidDate(s) {
@@ -130,6 +143,7 @@ const Config = (() => {
             localStorage.setItem(CONFIG_KEY, JSON.stringify(config));
         } catch (e) {
             console.error('Config: Failed to save config:', e);
+            warnSaveFailed();
         }
     }
 
@@ -178,8 +192,23 @@ const Config = (() => {
             return true;
         } catch (e) {
             console.error('Config: Failed to save deck:', e);
+            warnSaveFailed();
             return false;
         }
+    }
+
+    /**
+     * Return a deck name that is not taken yet: "X (imported)", "X (imported 2)", ...
+     */
+    function uniqueDeckName(base) {
+        const names = config.deckNames;
+        if (!names.includes(base)) return base;
+        let candidate = `${base} (imported)`;
+        let n = 2;
+        while (names.includes(candidate)) {
+            candidate = `${base} (imported ${n++})`;
+        }
+        return candidate;
     }
 
     function deleteDeck(name) {
@@ -205,7 +234,13 @@ const Config = (() => {
 
         // Write under new name, remove old key
         deck.name = newName;
-        localStorage.setItem(deckKey(newName), JSON.stringify(deck));
+        try {
+            localStorage.setItem(deckKey(newName), JSON.stringify(deck));
+        } catch (e) {
+            console.error('Config: Failed to rename deck:', e);
+            warnSaveFailed();
+            return false;
+        }
         localStorage.removeItem(deckKey(oldName));
 
         // Update deckNames list in place (preserves order)
@@ -389,6 +424,7 @@ const Config = (() => {
         getDeckNames,
         loadDeck,
         saveDeck,
+        uniqueDeckName,
         deleteDeck,
         renameDeck,
         createEmptyDeck,

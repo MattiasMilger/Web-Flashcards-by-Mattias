@@ -62,12 +62,14 @@ Web Flashcards by Mattias/
 ## Spaced Repetition (SM-2)
 
 Cards are scheduled based on your performance. Rate each card as:
-- **Again** (<10m) - failed, shown again soon.
-- **Hard** (1–2d) - struggled, short interval.
-- **Good** (3–7d) - normal, standard interval.
-- **Easy** (7d+) - easy, long interval.
+- **Again** - failed. The card comes back a few cards later in the same session and doesn't count toward the daily goal until you pass it.
+- **Hard** - struggled, short interval.
+- **Good** - normal, standard interval.
+- **Easy** - easy, long interval.
 
-The interval between reviews grows each time you rate a card as Good or Easy, following the SM-2 algorithm. New cards and cards that are due appear in each session, up to the daily goal.
+Each button shows exactly when the card will come back (e.g. `3d`, `2mo`). Each better rating is always at least one day longer than the one before. The interval between reviews grows each time you rate a card as Good or Easy, following the SM-2 algorithm. New cards and cards that are due appear in each session, up to the daily goal. Days change at local midnight.
+
+With **Accumulate Daily Goal** turned on, unstudied cards carry over to the next day, including days the app was not opened (goal 8, three days skipped: day four has 8 + 24 = 32 cards queued).
 
 ## Card Notes
 

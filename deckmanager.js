@@ -238,7 +238,7 @@ const DeckManager = (() => {
                 const result = Config.importDeck(JSON.parse(e.target.result));
                 if (typeof result === 'string') { UI.showMessage(result, 'error'); return; }
 
-                if (Config.getDeckNames().includes(result.name)) result.name += ' (imported)';
+                result.name = Config.uniqueDeckName(result.name);
 
                 Config.saveDeck(result);
                 selected = result.name;
@@ -273,8 +273,7 @@ const DeckManager = (() => {
                 return;
             }
 
-            let deckName = file.name.replace(/\.txt$/i, '').trim() || 'Imported Deck';
-            if (Config.getDeckNames().includes(deckName)) deckName += ' (imported)';
+            const deckName = Config.uniqueDeckName(file.name.replace(/\.txt$/i, '').trim() || 'Imported Deck');
 
             const deck = Config.createEmptyDeck(deckName);
             deck.cards = cards;

@@ -12,6 +12,13 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="dark-mode">
+    <script>
+        // Apply the saved theme before the page paints (avoids a dark flash in light mode)
+        try {
+            var savedCfg = JSON.parse(localStorage.getItem('flashcards_config') || '{}');
+            if (savedCfg.theme === 'light') document.body.classList.remove('dark-mode');
+        } catch (e) { /* ignore */ }
+    </script>
     <div class="container">
         <div id="message-area" class="message-area hidden"></div>
         <h1>Web Flashcards</h1>
@@ -70,19 +77,19 @@
             <div id="rating-buttons" class="rating-buttons hidden">
                 <button id="btn-again" class="rating-button fail-button">
                     Again
-                    <span class="button-sub">&lt;10m</span>
+                    <span class="button-sub">Soon</span>
                 </button>
                 <button id="btn-hard" class="rating-button hard-button">
                     Hard
-                    <span class="button-sub">1–2d</span>
+                    <span class="button-sub">1d</span>
                 </button>
                 <button id="btn-good" class="rating-button success-button">
                     Good
-                    <span class="button-sub">3–7d</span>
+                    <span class="button-sub">3d</span>
                 </button>
                 <button id="btn-easy" class="rating-button easy-button">
                     Easy
-                    <span class="button-sub">7d+</span>
+                    <span class="button-sub">4d</span>
                 </button>
             </div>
 
@@ -303,6 +310,7 @@
         <div class="modal-content modal-small">
             <span class="close-button" data-modal="settings-modal">&times;</span>
             <h2>Settings</h2>
+            <p class="modal-subtitle">These settings apply to the currently open deck.</p>
             <div class="form-group">
                 <label>Accumulate Daily Goal:</label>
                 <div class="radio-group">
@@ -370,10 +378,11 @@
                     <strong>Spaced Repetition (SM-2)</strong>
                     <ul class="info-list">
                         <li>Cards are scheduled based on how well you know them.</li>
-                        <li><strong>Again</strong> (&lt;10m) - failed, review again soon.</li>
-                        <li><strong>Hard</strong> (1–2d) - struggled, short interval.</li>
-                        <li><strong>Good</strong> (3–7d) - normal, standard interval.</li>
-                        <li><strong>Easy</strong> (7d+) - easy, long interval.</li>
+                        <li><strong>Again</strong> - failed. The card comes back a few cards later in the same session and doesn't count toward your daily goal until you pass it.</li>
+                        <li><strong>Hard</strong> - struggled, short interval.</li>
+                        <li><strong>Good</strong> - normal, standard interval.</li>
+                        <li><strong>Easy</strong> - easy, long interval.</li>
+                        <li>Each button shows exactly when the card will come back (e.g. <em>3d</em> = in 3 days, <em>2mo</em> = in 2 months). Intervals grow each time you pass a card.</li>
                         <li>Only new cards and cards due today (or overdue) appear in your session.</li>
                     </ul>
                 </div>
@@ -381,7 +390,8 @@
                     <strong>Accumulate Daily Goal</strong>
                     <ul class="info-list">
                         <li>When set to <strong>Yes</strong>, any cards you didn't study on a given day carry over and are added to the next day's goal.</li>
-                        <li>For example, with a daily goal of 8 and no cards studied for three days, you'll have 24 cards queued on day four.</li>
+                        <li>Days you don't open the app count as missed too. For example, with a daily goal of 8 and three days skipped, day four has 8 + 24 = 32 cards queued.</li>
+                        <li>You can only be shown cards that are new or due, so the queue may be shorter than the accumulated goal.</li>
                         <li>When set to <strong>No</strong> (default), each day starts fresh with exactly the daily goal regardless of missed days.</li>
                         <li>Turning this setting off clears any currently accumulated cards.</li>
                     </ul>
